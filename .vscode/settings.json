@@ -1,0 +1,27 @@
+{
+  "workbench.colorTheme": "Solarized Dark",
+  "workbench.editorAssociations": {
+    "*.md": "vscode.markdown.preview.editor",
+    "*.copilotmd": "vscode.markdown.preview.editor",
+    "{hexdiff}:/**/*.*": "hexEditor.hexedit",
+    "python.analysis.completion.addBrackets": true,
+    "initial_design.md": "vscode.markdown.preview.editor",
+    "final_design.md": "vscode.markdown.preview.editor",
+    "reflection.md": "vscode.markdown.preview.editor",
+    "RD1.md": "vscode.markdown.preview.editor",
+    "RD2.md": "vscode.markdown.preview.editor",
+    "RD3.md": "vscode.markdown.preview.editor",
+    "README.md": "vscode.markdown.preview.editor",
+    "design.md": "vscode.markdown.preview.editor",
+    "grades.md": "vscode.markdown.preview.editor",
+    "algorithm.md": "vscode.markdown.preview.editor",
+    "PORTFOLIO.md": "vscode.markdown.preview.editor",
+    "*.jpeg": "luna.editor",
+    "*.xlsx": "gc-excelviewer-excel-editor",
+    "*.docx": "cweijan.officeViewer",
+    "*.pdf": "syncfusion-pdf-viewer"
+  },
+  "markdown.preview.openMarkdownLinks": "inPreview",
+  "markdown.preview.doubleClickToSwitchToEditor": false,
+  "workbench.editor.enablePreview": true
+}
