@@ -65,8 +65,8 @@ Click the class repo link
 
 ### VSCode Setup
 VS Code is an IDE\tool to develop a SW. These days we use it for more than that. 
-![alt text](vscode-ide.png)
-[Lean more](https://workshops.nuevofoundation.org/razor/learn-vscode/)
+![alt text](vscode.png)
+[Lean more](https://code.visualstudio.com/docs/getstarted/getting-started)
 
 #### Sign In to GitHub from VS Code
 
