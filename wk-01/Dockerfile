@@ -1,8 +1,8 @@
 FROM ubuntu:22.04
 EXPOSE 3389/tcp
 EXPOSE 22/tcp
-ARG USER=test
-ARG PASS=1234
+ARG USER=student
+ARG PASS=dps_repo
 ARG X11Forwarding=false
 
 ENV DEBIAN_FRONTEND=noninteractive

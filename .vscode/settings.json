@@ -22,6 +22,9 @@
     "*.pdf": "syncfusion-pdf-viewer"
   },
   "markdown.preview.openMarkdownLinks": "inPreview",
-  "markdown.preview.doubleClickToSwitchToEditor": false,
-  "workbench.editor.enablePreview": true
+  "markdown.preview.doubleClickToSwitchToEditor": true,
+  "workbench.editor.enablePreview": true,
+  "cSpell.words": [
+    "xrdp"
+  ]
 }
