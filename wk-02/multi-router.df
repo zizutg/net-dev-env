@@ -1,0 +1,23 @@
+# Dockerfile for creating docker image for
+# ubuntu-22, gcc, curl, wget, net-tools, iputils, python3, ssh
+
+FROM ubuntu
+
+RUN apt update
+
+RUN apt -y install vim nano
+RUN apt -y install net-tools 
+RUN apt -y install netcat-openbsd
+RUN apt -y install tcpdump 
+RUN apt -y install iproute2
+RUN apt -y install python3
+RUN apt -y install iputils-ping 
+RUN apt -y install mtr-tiny 
+RUN apt -y install dnsutils
+RUN apt -y install vlan
+RUN apt -y install curl wget
+RUN apt -y install iptables
+RUN apt -y install conntrack
+RUN apt -y install iftop
+
+RUN ln -sf /usr/bin/python3 /usr/local/bin/python

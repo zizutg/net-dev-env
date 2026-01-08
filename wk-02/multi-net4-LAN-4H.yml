@@ -1,0 +1,46 @@
+networks:
+  net-1:
+    driver: bridge
+  net-2:
+    driver: bridge
+
+services:
+  H1:
+    image: zizutg/net-ub22-host
+    container_name: H1
+    privileged: true
+    tty: true
+    networks:
+      net-1:
+      net-2:
+    command: tail -f /dev/null
+
+  H2:
+    image: zizutg/net-ub22-host
+    container_name: H2
+    privileged: true
+    tty: true
+    networks:
+      net-1:
+      net-2:
+    command: tail -f /dev/null
+
+  H3:
+    image: zizutg/net-ub22-host
+    container_name: H3
+    privileged: true
+    tty: true
+    networks:
+      net-1:
+      net-2:
+    command: tail -f /dev/null
+
+  H4:
+    image: zizutg/net-ub22-host
+    container_name: H4
+    privileged: true
+    tty: true
+    networks:
+      net-1:
+      net-2:
+    command: tail -f /dev/null

@@ -1,0 +1,44 @@
+# Dockerfile for creating docker image for
+# ubuntu-22, gcc, curl, wget, net-tools, iputils, python3, ssh
+
+FROM ubuntu
+
+RUN apt update
+
+RUN apt -y install vim nano
+RUN apt -y install net-tools 
+RUN apt -y install netcat-openbsd
+RUN apt -y install tcpdump 
+RUN apt -y install iproute2
+RUN apt -y install python3
+RUN apt -y install apache2
+RUN apt -y install libapache2-mod-wsgi-py3
+RUN apt -y install iputils-ping mtr-tiny dnsutils
+RUN apt -y install curl wget
+
+RUN apt install -y openssh-server
+RUN mkdir -p /var/run/sshd
+RUN echo 'root:root' | chpasswd
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN apt-get install -y rsync
+RUN mkdir -p /root/.ssh
+RUN ssh-keygen -t rsa -f /root/.ssh/id_rsa -q -N ""
+RUN cp /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys
+
+EXPOSE 22
+
+RUN apt -y install hping3
+RUN apt update && apt -y install python3-scapy 
+RUN apt -y install php 
+RUN apt -y install libapache2-mod-php
+
+RUN mkdir -p /usr/lib/cgi-bin
+COPY html/ /var/www/html/
+COPY cgi-bin/ /usr/lib/cgi-bin/
+COPY conf/000-default.conf /etc/apache2/sites-available/000-default.conf
+RUN a2enmod cgi
+RUN mkdir -p /Programs
+COPY Programs/ /Programs
+RUN find /Programs -type f \( -name '*.py' -o -name '*.sh' \) -print0 | xargs -0 -n1 sed -i 's/\r$//'
+
+RUN apt -y install traceroute

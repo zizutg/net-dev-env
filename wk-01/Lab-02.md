@@ -1,7 +1,6 @@
-# Lab 02 - Linux User and Groups
+# Lab 02 - Linux User, Groups and Permissions
 
-This exercise provides basic understanding of users in a Linux system
-and grouping of users.
+This exercise provides basic understanding of users in a Linux system, grouping of users, and permissions of users.
 
 ## Learning Objectives
 
@@ -245,8 +244,95 @@ package name. To remove outdated dependencies, use autoclean option.
     >*Building dependency tree\... Done*<br>
     >*Reading state information\... Done*<br>
 
+## Permissions
+
+Create `permissions` directrory, then create 5 files inside the directory, change your directory to persmission and list all files as well as details
+
+- `student:~/mkdir permissions && cd permissions`
+- `touch file1.txt file2.txt file3.txt file4.txt file5.txt`
+- `ls -l`
+    > *total 0*
+    > *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file1.txt*
+    > *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file2.txt*
+    > *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file3.txt*
+    > *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file4.txt*
+    > *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file5.txt*
+
+Change the user of file1 to testuser1 and user as well as group of file2 to testuser1. Then list details again
+
+- `student:~/permissions$ sudo chown testuser1 file1.txt`
+- `student:~/permissions$ sudo chown testuser1:testuser1 file2.txt`
+- `student:~/permissions$ ls -l`
+    > *total 0*<br>
+    > *-rw-rw-r-- 1 testuser1 student   0 Dec 30 19:45 file1.txt*<br>
+    > *-rw-rw-r-- 1 testuser1 testuser1 0 Dec 30 19:45 file2.txt*<br>
+    > *-rw-rw-r-- 1 student   student   0 Dec 30 19:45 file3.txt*<br>
+    > *-rw-rw-r-- 1 student   student   0 Dec 30 19:45 file4.txt*<br>
+    > *-rw-rw-r-- 1 student   student   0 Dec 30 19:45 file5.txt*<br>
+
+Add and remove sticky bits of permission directory
+
+- `student:~$ chmod o+t permissions`
+- `student:~$ ls -l` 
+    > *...*<br>
+    > *drwxr-xr-x 2 student student 4096 Dec 29 18:24 Videos*<br>
+    > *drwxrwxr-t 2 student student 4096 Dec 30 19:45 permissions*<br>
+    > *drwxrwxr-t 2 student student 4096 Dec 29 18:24 thinclient_drives*<br>
+- `student:~$ chmod o-t permissions`
+- `student:~$ ls -l` 
+    > *...*<br>
+    > *drwxr-xr-x 2 student student 4096 Dec 29 18:24 Videos*<br>
+    > *drwxrwxr-x 2 student student 4096 Dec 30 19:45 permissions*<br>
+    > *drwxrwxr-t 2 student student 4096 Dec 29 18:24 thinclient_drives*<br>
+
+Change the mode of file3 give everyone all permission, update the sticky bit of user executable for file4 , update the group executable sticky bit of file5.
+
+
+- `student:~/permissions$ chmod 777 file3.txt` 
+- `student:~/permissions$ chmod 4755 file4.txt` 
+- `student:~/permissions$ chmod 2755 file5.txt` 
+- `student:~/permissions$ ls -l`
+    > *total 0*
+    > *-rw-rw-r-- 1 testuser1 student   0 Dec 30 19:45 file1.txt*<br>
+    > *-rw-rw-r-- 1 testuser1 testuser1 0 Dec 30 19:45 file2.txt*<br>
+    > *-rwxrwxrwx 1 student   student   0 Dec 30 19:45 file3.txt*<br>
+    > *-rw~~s~~r-xr-x 1 student   student   0 Dec 30 19:45 ~~file4.txt~~*<br>
+    > *-rwxr-~~s~~r-x 1 student   student   0 Dec 30 19:45 ~~file5.txt~~*<br>
+
+- `student:~$ sudo chage -M 365 testuser1`
+- `student:~$ sudo chage -E 2030-01-01 testuser1`
+- `student:~$ sudo chage -l testuser1`    
+    > *Password expires                                        : Dec 29, 2026*<br>
+    > *Last password change                                    : Dec 29, 2025*<br>
+    > *Password inactive                                       : never*<br>
+    > *Account expires                                         : Jan 01, 2030*<br>
+    > *Minimum number of days between password change          : 0*<br>
+    > *Maximum number of days between password change          : 365*<br>
+    > *Number of days of warning before password expires       : 7*<br>
+
+To view the access control list of file1.txt
+
+- `student:~/permissions$ getfacl file1.txt` 
+    > *# owner: testuser1*<br>
+    > *# file: file1.txt*<br>
+    > *# group: student*<br>
+    > *user::rw-*<br>
+    > *group::rw-*<br>
+    > *other::r--*<br>
+
+To modify the student group ACL of file1.txt
+
+- `student:~/permissions$ sudo setfacl -m g:student:rwx file1.txt` 
+- `student:~/permissions$ getfacl file1.txt` 
+    > *# owner: testuser1*<br>
+    > *# file: file1.txt*<br>
+    > *# group: student*<br>
+    > *user::rw-*<br>
+    > *group::rw-*<br>
+    > *group:student:rwx*<br>
+    > *mask::rwx*<br>
+    > *other::r--*<br>
+
 ## Summary
 
-In this exercise, we have learnt working witih creating users, changing
-the password and managing software packages including installing and
-removing these.
+In this exercise, we have learnt working with creating users, changing the password and managing software packages including installing and removing these. In addition, we practiced with user and group permissions.
