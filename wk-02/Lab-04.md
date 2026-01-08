@@ -1,6 +1,6 @@
 
 
-# Lab 04 - IP Addressing, and Subnets
+# Lab 04 - IP Addressing, Subnets, and Routing Basics
 
 This exercise provides overview of docker containers and their use in creating various network scenarios to study network behaviour. 
 

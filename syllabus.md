@@ -9,7 +9,7 @@
 | IPv4: Address, Notation, Classes                             | 2/2/2026  |
 | Routing & Forwarding basics                                  | 2/4/2026  |
 | Lab 03: IP Addressing                                        | 2/6/2026  |
-| Lab 04: IP Forwarding                                        | 2/6/2026  |
+| Lab 04: Subnets and Routing                                  | 2/6/2026  |
 | Internet Components and Connections systems                   | 2/9/2026  |
 | Switching, Delays & Layering                                 | 2/11/2026 |
 | Lab 05: Emulating and Examining the Internet                 | 2/13/2026 |
