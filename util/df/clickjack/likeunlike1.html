@@ -1,0 +1,22 @@
+<html>
+  <head> <title>Overlapping Iframes</title> 
+  </head>
+<body>
+      <iframe id="A" src="http://cj.test.internal/clickjack/likes.html"></iframe>
+      <iframe id="B" src="http://cj.test.internal/clickjack/unlikes.html"></iframe>
+
+<style type="text/css">
+  #A {
+    position:absolute; top:99px; left:50px;
+    width:400px; height: 200px; 
+     }
+  #B {
+     position:absolute; top:50px; left:50px;
+     width:400px; height: 200px; 
+     opacity: 0.2;
+     }
+  </style>
+</body>
+</html>
+
+

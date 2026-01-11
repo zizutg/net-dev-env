@@ -3,7 +3,7 @@
 
 FROM ubuntu
 
-RUN apt update
+RUN apt-get update
 
 RUN apt -y install vim nano
 RUN apt -y install net-tools 
@@ -28,7 +28,7 @@ RUN cp /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys
 EXPOSE 22
 
 RUN apt -y install hping3
-RUN apt update && apt -y install python3-scapy 
+RUN apt-get update && apt -y install python3-scapy 
 RUN apt -y install php 
 RUN apt -y install libapache2-mod-php
 
@@ -42,3 +42,4 @@ COPY Programs/ /Programs
 RUN find /Programs -type f \( -name '*.py' -o -name '*.sh' \) -print0 | xargs -0 -n1 sed -i 's/\r$//'
 
 RUN apt -y install traceroute
+RUN apt install -y nmap ncat liblua5.3-0

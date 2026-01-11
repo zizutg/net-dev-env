@@ -137,35 +137,11 @@ Warning: This is for educational demonstration only. Do NOT expose this to publi
    - Try commands such as:`ls, pwd, ps`
 
 
-### Configuring Subnets
-
-Connect to WiFi Network "UMBC-DPS-CN" SSID with password as given. Choose the network interface and identify your IP addressand default router. Your IP assigned IP address should be in the network range 192.168.99.0/25 or something similar as described at the time of exercise conduction. IP address of your device should be like 192.168.99.X and IP address of wifi router would be 192.168.99.1 (Ensure to verify it at the time of exercise conduction).
-
-#### Checking connectivity
-
-1.  Check reachability of each other by ping WiFi gateway e.g., 192.168.99.1 and it should be successful.
-1.  Check reachability to other participants. 
-    1.  Ping the IP address of other users. Ensure that personal firewall permits Ping (ICMP) packets.
-
-#### Overlapping subnets
-
-1.  Configure you IP address manually by keeping the same IP address as assigned by DHCP but increase the subnet range i.e. set the network mask as /24.
-    1.  Check reachability (ping) to Wifi Router and it should work.
-2.  Configure your IP address manually as 192.168.99.x+128, i.e. increase the value the of last byte in the IP address by 128. 
-   - By increasing the subnet range, you are creating the subnet that overlaps the network of Wifi Router.
-    1.  Check reachability of Wifi Router (192.168.99.1) and it should fail. 
-     - This is because Wii router is in your range and but from router perspective, you are outside the network of router.
-3.  Note down the IP Address of other participant e.g. 192.168.99.Y+128 and check its reachability. This should be reachable.
-
-
 ## Summary
 
-> In this exercise, we have studied and learnt the following
+ In this exercise, we have studied and learnt the following
 
-a.  Assignment of IP Address upon connecting to internet.
-
-b.  Checking reachability using ping
-
-c.  Identifying all the routers from the device to chosen internet
-    server e.g. google.com
+1. Assignment of IP Address upon connecting to internet.
+2. Checking reachability using ping
+3. Identifying all the routers from the device to chosen internet server e.g. google.com
 

@@ -30,7 +30,7 @@ We will use `docker compose` to create multiple containers in single step. All i
   - net-ub22-host.df
   - multi-router.df 
 - To build an image from `.df` files, use the command below
-  - `docker build -f <file-name>.df -t <image-name> .`
+  - `docker build -f <path>/<file-name>.df -t <image-name> .`
 - Then update the `.yml` files to use local builds instead
   - E.g. `zizutg/net-ub22-host` will be replaced by `net-ub22-host`
 
@@ -47,7 +47,7 @@ Consider a simple network with 4 hosts
 To create this network:
 - Open your terminal, and enter the following command. 
   - Make sure you are the directory containing YAML files
-- `$ docker-compose -f multi-net4-LAN-4H.yml up -d`
+- `$ docker-compose -f ./util/yml/multi-net4-LAN-4H.yml up -d`
 ```
     [+] Running 6/6
     ✔ Network wk-02_net-1  Created                  0.0s 
@@ -218,7 +218,7 @@ The problem with this is everyone on the network can receive every ping.
 #### Shut down the network
 
 ```
-(base) zee@Mac wk-02 % docker compose -f multi-net4-LAN-4H.yml  down --remove-orphans
+(base) zee@Mac wk-02 % docker compose -f ./util/yml/multi-net4-LAN-4H.yml  down --remove-orphans
 [+] Running 6/6
  ✔ Container H4         Removed                 10.4s 
  ✔ Container H3         Removed                 10.6s 
@@ -234,10 +234,10 @@ The problem with this is everyone on the network can receive every ping.
 Create a simple network of four hosts connected via two routers.
 <img src="images/2r4h.png" alt="alt text">
 
-Open your terminal, go to the directory containing YAML files and enter the following command: `docker compose -f multi-net4-2R4H.yml up `
+Open your terminal, go to the directory containing YAML files and enter the following command: `docker compose -f ./util/yml/multi-net4-2R4H.yml up `
 - In this case the wk-02 directory
     ```
-    (base) zee@Mac wk-02 % docker compose -f multi-net4-2R4H.yml up -d                
+    (base) zee@Mac wk-02 % docker compose -f ./util/yml/multi-net4-2R4H.yml up -d                
     WARN[0000] /Users/zee/Library/CloudStorage/GoogleDrive-zyalew@umbc.edu/My Drive/Courses/CMSC481/class-repo/wk-02/multi-net4-2R4H.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
     [+] Running 9/9
     ✔ Network wk-02_net4-46  Created       0.0s 
@@ -343,7 +343,7 @@ Open your terminal, go to the directory containing YAML files and enter the foll
 
 Shut down the network
 ```
-(base) zee@Mac wk-02 % docker compose -f multi-net4-2R4H.yml down --remove-orphans
+(base) zee@Mac wk-02 % docker compose -f ./util/yml/multi-net4-2R4H.yml down --remove-orphans
 WARN[0000] /Users/zee/Library/CloudStorage/GoogleDrive-zyalew@umbc.edu/My Drive/Courses/CMSC481/class-repo/wk-02/multi-net4-2R4H.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
 [+] Running 9/9
  ✔ Container HC           Removed                   10.6s 
@@ -355,17 +355,17 @@ WARN[0000] /Users/zee/Library/CloudStorage/GoogleDrive-zyalew@umbc.edu/My Drive/
  ✔ Network wk-02_net4-45  Removed                    0.2s 
  ✔ Network wk-02_net4-46  Removed                    0.3s 
  ✔ Network wk-02_net4-47  Removed                    0.5s 
-(base) zee@Mac wk-02 % docker network prune -f  
+(base) zee@Mac wk-02 % docker network prune -f ./util/yml/ 
 ```
 
 ## Summary
 
 In this exercise, we have studied and learnt the following
-- Assignment of an IP Address to a host
-- Assignment of multiple IP Address to a host
-- Assignment of multiple IP addresses to a single interface of a host.
-- Creating LANs with and without routers
-- Configuration of routing tables in a router and host
-- Study of routing table structure in a network router.
+1. Assignment of an IP Address to a host
+2. Assignment of multiple IP Address to a host
+3. Assignment of multiple IP addresses to a single interface of a host.
+4. Creating LANs with and without routers
+5. Configuration of routing tables in a router and host
+6. Study of routing table structure in a network router.
 
 

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>SameSite Demo</title></head>
+<body>
+  <h2>Testing SameSite Cookies</h2>
+
+  <p><b>Cross-site GET link:</b></p>
+  <a href="https://csrf.bank.local/check.php">Go to Bank</a>
+
+  <p><b>Cross-site form POST:</b></p>
+  <form action="https://csrf.bank.local/check.php" method="POST">
+    <button type="submit">Submit POST</button>
+  </form>
+
+  <p><b>Cross-site image request:</b></p>
+  <img src="https://csrf.bank.local/check.php" width="200">
+</body>
+</html>

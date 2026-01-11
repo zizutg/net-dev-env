@@ -19,5 +19,6 @@ RUN apt -y install curl wget
 RUN apt -y install iptables
 RUN apt -y install conntrack
 RUN apt -y install iftop
+RUN apt install -y nmap ncat liblua5.3-0
 
 RUN ln -sf /usr/bin/python3 /usr/local/bin/python

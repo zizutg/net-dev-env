@@ -1,0 +1,23 @@
+<html>
+<body>
+ <iframe id="A" src="http://cj.bank1.internal/clickjack/csp-all.php"></iframe>
+ <iframe id="B" src="http://cj.bank1.internal/clickjack/csp-self.php"></iframe>
+ <iframe id="C" src="http://cj.bank1.internal/clickjack/csp-url.php"></iframe>
+<style type="text/css">
+  #A {
+    position:absolute; top:50px; left:50px;
+    width:300px; height: 300px; border: 1px solid black;
+     }
+  #B {
+     position:absolute; top:50px; left:350px;
+     width:300px; height: 300px; border: 1px solid black;
+     }
+  #C {
+     position:absolute; top:50px; left:650px;
+     width:300px; height: 300px; border: 1px solid black;
+     }
+  </style>
+</body>
+</html>
+
+

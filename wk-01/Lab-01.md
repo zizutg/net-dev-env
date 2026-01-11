@@ -126,7 +126,7 @@ following extensions:
 
 Run the following commands:
 
-> `docker build -t ub22-host .`
+> `docker build -f ./util/df/multi-gui-host.df -t ub22-host .`
 
 Run the Docker Container
 
