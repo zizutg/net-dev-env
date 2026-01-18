@@ -19,43 +19,31 @@ Click the class repo link
 ## Learning Objectives
 
 -   Understand basics of Linux Commands.
-
 -   Become familiar with Linux Terminal in Docker Container
-
 -   Understand program execution
 
 ## Learning Resources
 
 1.  Downloading and installing Git
-
     a.  <https://git-scm.com/install/>
 
 > N.B. Mac and Linux systems may already have git
 
 2. Download and Install Docker
-
     a.  <https://www.docker.com/products/docker-desktop/>
-
         i.  Choose the one suitable for your machine
-
-        ii. May ask you to register, please do
-
+        ii. May ask you to register, 
         iii. Must always run in the background
 
 3.  Enabling Windows Sub System for Linux
-
     a.  <https://learn.microsoft.com/en-us/windows/wsl/install>
 
 4.  Download and install VSCode
-
     a.  <https://code.visualstudio.com/download>
-
 5.  Access your Github Account: **signin** or **signup**
-
     a.  <https://github.com/>
 
 6. **For Mac users: download and install Microsoft Remote Desktop** 
-   
    a. [Windows App](https://apps.apple.com/app/microsoft-remote-desktop/id1295203466).
 
 ## Environment 
@@ -176,26 +164,26 @@ On successful login to a Linux, open the terminal:
 - you are place in home directory,which typically ends with **`~$`**
 
 - To practice all all commands ***unminimize*** the current image
-  - `\$sudo unminimize`
+  - `$sudo unminimize`
 - To know which directory you are in, enter
-  - `\$ pwd`
+  - `$ pwd`
   - **/home/student**
 - Explore the directory structure using `ls` command. Explore more options with man ls
   
   <img src="dir-struct.png">
   
 - List the contents of current directory
-    - `\$ ls`
+    - `$ ls`
 - List the contents of a different directory, e.g. /home directory, in detail
-    - `\$ ls -l /home`
+    - `$ ls -l /home`
 - List the contents of current directory including hidden files (file starting with .(Dot))
-    - `\$ ls -la`
+    - `$ ls -la`
 - List the contents of in reverse order of modification time. Oldest entries are shown first, and most recent are shown in last last
-    - `\$ ls -ltr /var/log/`
+    - `$ ls -ltr /var/log/`
 - List the contents of in order of modification time.
-    - `\$ ls -lt /etc`
+    - `$ ls -lt /etc`
 - Study the man page of ls command and its options.
-    - `\$ man ls`
+    - `$ man ls`
 
 ### Changing Directory
 
@@ -204,24 +192,24 @@ The command `cd` changes the current directory to specified directory.
 - The command `pushd` stores the current directory information on stack and changes the current directory to specified destination. 
 - The command `popd` returns the directory which on top of the stack.
 
-- `\$ pwd`
+- `$ pwd`
     >*/home/student*
-- `\$ pushd /home`
+- `$ pushd /home`
     >*/home ~*
-- `\$ pushd /var/log`
+- `$ pushd /var/log`
     >*/var/log /home ~*
-- `\$ pushd /tmp`
+- `$ pushd /tmp`
     >*/tmp /var/log /home ~*
-- `\$ popd`
+- `$ popd`
     >*/var/log /home ~*
-- `\$ popd`
+- `$ popd`
     >*/home ~*
-- `\$ popd`
+- `$ popd`
     >*~*
-- `\$ popd`
+- `$ popd`
   >*-bash: popd: directory stack empty*
 - Change to parent directory (..)
-  - `\$ cd ..`
+  - `$ cd ..`
 - Explore other directory with relative paths
 
 ### Viewing File contents
@@ -232,24 +220,24 @@ When dealing with files
 
 Commands to deal with files in 
 - To display content of a file
-    - `\$ cat \<filename\>`
+    - `$ cat \<filename\>`
 - e.g.display contents of password file contains list of all users on the system
-    - `\$ cat /etc/passwd`
+    - `$ cat /etc/passwd`
 - To display contents of multiple files together, specify more than one filenames with cat, e.g.
-    - `\$ cat /etc/hostname /etc/passwd`
+    - `$ cat /etc/hostname /etc/passwd`
 - To display contents of larger files (more than current display screen size) i.e. navigate the file contents, use less or more commands
-    - `\$ less /etc/passwd`
+    - `$ less /etc/passwd`
     - Might requite to install the command `sudo apt install less`
 - Enter q to quit.
-    - `\$ more /etc/passwd`
+    - `$ more /etc/passwd`
 - To display top N (default = 10) lines of a file, use head command
-    - `\$ head /etc/services`
-    - `\$ head -5 /etc/services`
+    - `$ head /etc/services`
+    - `$ head -5 /etc/services`
 - To display bottom N (default = 10) lines of a file, use tail command
-    - `\$ tail /etc/services`
-    - `\$ tail -5 /etc/services`
+    - `$ tail /etc/services`
+    - `$ tail -5 /etc/services`
 - To display all lines starting from Nth line, use option +N
-    - `\$ tail +15 /etc/services`
+    - `$ tail +15 /etc/services`
 
 ### Searching for Files
 
@@ -267,14 +255,14 @@ The basic options are
 - -perm *mode*
 - -mtime *+/-n (time)*
 - To understand full details use man command
-  - `\$ man find`
+  - `$ man find`
 - Examples
 - Find files with filename matching some pattern
-  - `\$ find /etc -name "services" -print`
-  - `\$ find /etc -name "host\*" -print`
+  - `$ find /etc -name "services" -print`
+  - `$ find /etc -name "host\*" -print`
 - Find files with size parameters i.e. greater than or less than specified size
-  - `\$ find /etc -size +10000 -print`
-  - `\$ find /var/log -size -10000 -print`
+  - `$ find /etc -size +10000 -print`
+  - `$ find /var/log -size -10000 -print`
 
 ***Explore other options as well***
 
@@ -282,60 +270,60 @@ The basic options are
 
 Use of grep command to search files for specific pattern. The general
 usage is
-- \$ grep \[*options*\] *pattern* *file(s)*
+- $ grep \[*options*\] *pattern* *file(s)*
 
 Examples
 By default, search is case sensitive. To do case insensitive search,
 i.e. match lower case, upper case and even mixed case, use option -i.
 
-- `\$ grep http /etc/services`
-- `\$ grep -i HTTP /etc/services`
+- `$ grep http /etc/services`
+- `$ grep -i HTTP /etc/services`
 
 When search for group of words, enclose them in quotes.
 
-- `\$ grep "http protocol" /etc/services`
+- `$ grep "http protocol" /etc/services`
 
 For negative (or inverse) search, find all lines which does not have the
 pattern, use option -v.
 
-- `\$ grep -vi tcp /etc/services`
+- `$ grep -vi tcp /etc/services`
 
 ### Managing Files and Directories
 
 Creating directory
-- `\$ mkdir dir1`
-- `\$ mkdir dir2 dir3 \[...\]`
+- `$ mkdir dir1`
+- `$ mkdir dir2 dir3 \[...\]`
 Creating nested subdirectory or directories
-- `\$ mkdir -p dir1/dir2/dir3`
+- `$ mkdir -p dir1/dir2/dir3`
 
 Creating empty files
-- `\$ touch file1.txt`
+- `$ touch file1.txt`
 
 Creating file with content. Use any text editor, e.g nano to create. It
 is UI driven and basic editor commands are displayed the bottom. Enter
 the text as needed and it will be displayed. Once entering/editing text
 is done, enter \^-X (Ctrl-X) to exit, enter Y to save and exit
 
-- `\$ nano file1.txt`
+- `$ nano file1.txt`
   - Type in: *Hello, World!*
   - Might need to install nano: `sudo apt install nano`
 - Removing file
-    - `\$ rm file1.txt`
+    - `$ rm file1.txt`
 - Removing multiple files
-    - `\$ rm file1 file2 \[...\]`
+    - `$ rm file1 file2 \[...\]`
 - Removing directory
-    - `\$ rmdir dir1 \[...\]`
+    - `$ rmdir dir1 \[...\]`
 
 - Removing directory having files and subdirectory in it. Use the -f to force the removal and -r to recursively traverse the subdirectories and remove these
 
-  - `\$ rm -f dir1`
+  - `$ rm -f dir1`
 - Copying files. Copy one file to another file
-    - `\$ cp file1 file2`
+    - `$ cp file1 file2`
 - Copying a directories and all of its file including subdirectories etc.
-    - `\$ cp -r dir1 newdir1`
+    - `$ cp -r dir1 newdir1`
 - Renaming files/directory
-    - `\$ mv file1 file2`
-    - `\$ mv dir1 dir2`
+    - `$ mv file1 file2`
+    - `$ mv dir1 dir2`
 
 ### Pipes and Redirection
 
@@ -345,12 +333,12 @@ Piping mechanism enables executing commands in a chain where output of
 previous commands becomes input to the next command. General usage of
 pipes (`|`)is given as
 
-- `\$ cmd1 | cmd2 | cmd3 ...`
+- `$ cmd1 | cmd2 | cmd3 ...`
 
 Examples
 
-- `\$ ls -l /etc | less`
-- `\$ grep tcp /etc/services | grep '\#' | less`
+- `$ ls -l /etc | less`
+- `$ grep tcp /etc/services | grep '\#' | less`
 
 #### Redirection
 
@@ -360,13 +348,13 @@ redirection symbol `>`
 Example below saves all service that use tcp in one file and all
 services using in another file,
 
-- `\$ grep tcp /etc/services >services_tcp.txt`
-- `\$ grep udp /etc/services >services_udp.txt`
+- `$ grep tcp /etc/services >services_tcp.txt`
+- `$ grep udp /etc/services >services_udp.txt`
 
 Following examples shows a way of combining multiple files into a single
 file
 
-- `\$ cat file1.txt file2.txt file3.txt >all_files.txt`
+- `$ cat file1.txt file2.txt file3.txt >all_files.txt`
 
 ### Viewing Processes
 
@@ -376,11 +364,11 @@ The option '-e' lists all the processes of system. Option '-f' provides
 full format listing of processes. Make use of man command to explore all
 the options of ps command.
 
-- `\$ ps`
-- `\$ ps -f`
-- `\$ ps -e`
-- `\$ ps -ef`
-- `\$ man ps`
+- `$ ps`
+- `$ ps -f`
+- `$ ps -e`
+- `$ ps -ef`
+- `$ man ps`
 
 ## Summary
 
