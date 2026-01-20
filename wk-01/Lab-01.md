@@ -4,46 +4,30 @@ This exercise provides hands-on experience with using Linux, basic
 commands and its directory structure.
 
 
-Accept the group assignment
-- **Name your group using you first name and last name separated by hyphen**
-
-Accept the assignment
-- Which is the real assignment
-
-Click the assignment repository link
-- open the wk-01 folder and Follow Lab-01 instructions 
-
-Click the class repo link 
-- [link here]
-
 ## Learning Objectives
-
--   Understand basics of Linux Commands.
--   Become familiar with Linux Terminal in Docker Container
--   Understand program execution
+- Setup Practice and Development Environment
+- Understand basics of Linux Commands.
+- Become familiar with Linux Terminal in Docker Container
+- Understand program execution
 
 ## Learning Resources
 
 1.  Downloading and installing Git
-    a.  <https://git-scm.com/install/>
-
+    1.  <https://git-scm.com/install/>
 > N.B. Mac and Linux systems may already have git
+1. Download and Install Docker
+    1.  <https://www.docker.com/products/docker-desktop/>
+        1. Choose the one suitable for your machine
+        2. May ask you to register, 
+        3. Must always run in the background
+2.  Enabling Windows Sub System for Linux
+    1.  <https://learn.microsoft.com/en-us/windows/wsl/install>
+3.  Download and install VSCode
+    1.  <https://code.visualstudio.com/download>
+4.  Access your Github Account: **signin** or **signup**
+    1.  <https://github.com/join>
 
-2. Download and Install Docker
-    a.  <https://www.docker.com/products/docker-desktop/>
-        i.  Choose the one suitable for your machine
-        ii. May ask you to register, 
-        iii. Must always run in the background
-
-3.  Enabling Windows Sub System for Linux
-    a.  <https://learn.microsoft.com/en-us/windows/wsl/install>
-
-4.  Download and install VSCode
-    a.  <https://code.visualstudio.com/download>
-5.  Access your Github Account: **signin** or **signup**
-    a.  <https://github.com/>
-
-6. **For Mac users: download and install Microsoft Remote Desktop** 
+5. **For Mac users: download and install Microsoft Remote Desktop** 
    a. [Windows App](https://apps.apple.com/app/microsoft-remote-desktop/id1295203466).
 
 ## Environment 
@@ -51,15 +35,32 @@ Click the class repo link
 - MacOS is based on Linux distribution and thus basic Linux commands work on Mac in similar way. 
 - On Windows, a basic setup of Linux be installed using WSL (Windows Subsystem for Linux), but for uniformity, we will work with Docker based Ubuntu setup.
 
+
+### Configuration Overview
+You may not fully understand what is going on?
+- That's ok. You don't need to understand how the engine work to learn driving
+
+`IDEs` (Integrated Development Environments) to makes practice and  development easy.
+- Consider this analogy to understand IDEs
+  - **The relationship between Tools and Homes**
+    ><img src="images/Tools_vs_House.png">
+  - **The relationship between IDE and Project**
+    ><img src="images/IDE_vs_SW.png">
+- But most program development is team sport, here instructor and student are in a team
+  - Git and GitHub allows the team to track the status of each memeber, e.g. what each member is updating
+  - Docker makes sure each member, virtually, is playing on the same field 
+  - So what is GL: an old field we use from time to time
+    - Might be discarded in the future
+  ><img src="images/dev-git-gl.png" width="75%">
+
+
 ### VSCode Setup
-VS Code is an IDE\tool to develop a SW. These days we use it for more than that. 
-![alt text](vscode.png)
-[Lean more](https://code.visualstudio.com/docs/getstarted/getting-started)
+
+Open VSCode and setup practice and development environment
 
 #### Sign In to GitHub from VS Code
 
 -   Click the **account icon** 👤 in the **bottom-left corner** of VS Code.
-
 -   Choose **Sign in with GitHub** and follow the prompts.
 
 #### VS Code Extensions
@@ -68,41 +69,30 @@ Click the window like icon, ⊞,on the left, search and install the
 following extensions:
 
 -   **vscode-icons** -- File and folder icons
-
 -   **Document Viewer** -- To view document files on VSCode
-
 -   **vscode-pdf** -- To view PDF files on VSCode
 
 **N.B. There will be other extensions we may install in the future**
 
-### Creating Ubuntu image and container 
-
 ####  Open VSCode and Clone the Class Example Repository
 
-1.  Open the **Command Palette** (Ctrl + Shift + P / Cmd + Shift + P)
-
+1.  Open the **Command Palette** `F1 or (Ctrl + Shift + P / Cmd + Shift + P)`
 2.  Type Git Clone and select **Remote Resources**.
-
 3.  Search for your project and click it.
-    1.  The project you accepted earlier
-
+    1. The project you accepted earlier
 4.  Choose a folder where you want your projects stored.
-    1.  I recommend `Documents` directory
-
+    1. I recommend `Documents` directory
 5.  When prompted, click **Trust the Authors**.
 
-
-####  Building and Running with Docker
+###  Building image and Running Container with Docker
 
 ##### Open VS Code Terminal
 
 -  Open the **Command Palette** (Ctrl + Shift + P / Cmd + Shift + P)
-
     - Type: `Focus on Terminal View`
     - Hit the `Enter\Return` to view a terminal
     - On the terminal type `cd wk-01` and hit `Enter`
-
-**Make sure the terminal indicated you current working folder**
+> **Make sure the terminal indicated you current working folder**
 
 ##### ✅ Pull and run the image 
 
@@ -170,7 +160,7 @@ On successful login to a Linux, open the terminal:
   - **/home/student**
 - Explore the directory structure using `ls` command. Explore more options with man ls
   
-  <img src="dir-struct.png">
+  <img src="images/dir-struct.png">
   
 - List the contents of current directory
     - `$ ls`
@@ -243,11 +233,7 @@ Commands to deal with files in
 
 #### Searching for Files with file attributes
 
-The find utility provides basic capabilities to search for files with
-meta attributes such as filenames, creation or modification date, size,
-permissions, ownership, file types etc.
-
-The basic options are
+The find utility provides basic capabilities to search for files with meta attributes such as filenames, creation or modification date, size, permissions, ownership, file types etc.The basic options are:
 
 - -name *pattern*
 - -size *n*
@@ -299,10 +285,7 @@ Creating nested subdirectory or directories
 Creating empty files
 - `$ touch file1.txt`
 
-Creating file with content. Use any text editor, e.g nano to create. It
-is UI driven and basic editor commands are displayed the bottom. Enter
-the text as needed and it will be displayed. Once entering/editing text
-is done, enter \^-X (Ctrl-X) to exit, enter Y to save and exit
+Creating file with content. Use any text editor, e.g nano to create. It is UI driven and basic editor commands are displayed the bottom. Enter the text as needed and it will be displayed. Once entering/editing text is done, enter \^-X (Ctrl-X) to exit, enter Y to save and exit
 
 - `$ nano file1.txt`
   - Type in: *Hello, World!*
@@ -329,9 +312,7 @@ is done, enter \^-X (Ctrl-X) to exit, enter Y to save and exit
 
 #### Pipes 
 
-Piping mechanism enables executing commands in a chain where output of
-previous commands becomes input to the next command. General usage of
-pipes (`|`)is given as
+Piping mechanism enables executing commands in a chain where output of previous commands becomes input to the next command. General usage of pipes (`|`)is given as
 
 - `$ cmd1 | cmd2 | cmd3 ...`
 
@@ -342,8 +323,7 @@ Examples
 
 #### Redirection
 
-This enables to save the output of current command into a file using
-redirection symbol `>`
+This enables to save the output of current command into a file using redirection symbol `>`
 
 Example below saves all service that use tcp in one file and all
 services using in another file,
@@ -358,11 +338,7 @@ file
 
 ### Viewing Processes
 
-Using command ps, one can view the running processes. The command
-without any options lists all running processes belonging to the user.
-The option '-e' lists all the processes of system. Option '-f' provides
-full format listing of processes. Make use of man command to explore all
-the options of ps command.
+Using command ps, one can view the running processes. The command without any options lists all running processes belonging to the user. The option '-e' lists all the processes of system. Option '-f' provides full format listing of processes. Make use of man command to explore all the options of ps command.
 
 - `$ ps`
 - `$ ps -f`
@@ -384,18 +360,34 @@ Most Git tasks for this course will be done **using the Source Control icon in V
 - We may switch to command based command based git in the future
 
 ### Setting Up Git Username and Email
-     - Before committing code in Git, you need to configure your identity.
-     - One-Time Global Setup
-       - This applies to all repositories on your computer.
+- Before committing code in Git, you need to configure your identity.
+- One-Time Global Setup
+- This applies to all repositories on your computer.
    - ***`THIS IS DONE ON THE SYSTEM TERMINAL NOT IN LINUX MACHINE`***
 
 ```bash
     git config --global user.name "Your Name"
     git config --global user.email "your_email@example.com"
 ```
-#### Tip for Students:  
+#### Tip for Students:    
+- Always **Pull instructor updates** before starting new work.
 - Always **Commit + Push** your work before class ends.  
-- Always **Pull instructor updates** before starting new work.  
+
+### Pulling Updates from Instructor
+
+When your instructor pushes updates, you need to bring them into your fork and local copy:
+
+1. Click the **Source Control icon**.
+2. At the top, click the **... menu** (three dots).
+3. Select **Pull**: to simply get update from the origin
+   1. You can also use **Pull from ...** 
+4. VS Code will fetch changes and attempt to merge automatically.
+5. If there are conflicts, VS Code will highlight them:
+   - Buttons will appear above each conflict: 
+     - **Accept Current**, 
+     - **Accept Incoming**, or 
+     - **Accept Both**.
+   - After resolving, click **✔ Commit** to finish the merge.
 
 ### Committing and Pushing Your Work
 
@@ -409,19 +401,3 @@ Most Git tasks for this course will be done **using the Source Control icon in V
 6. Then select **Commit & Sync** or **Commit & Push**
    1. The sync option will also get update from your repo, if there is any
 
-### Pulling Updates from Instructor
-
-When your instructor pushes updates, you need to bring them into your fork and local copy:
-
-1. Click the **Source Control icon**.
-2. At the top, click the **... menu** (three dots).
-3. Select **Pull**: to simply get update from the origin
-   1. You can also use **Pull from ...** 
-   
-4. VS Code will fetch changes and attempt to merge automatically.
-5. If there are conflicts, VS Code will highlight them:
-   - Buttons will appear above each conflict: 
-     - **Accept Current**, 
-     - **Accept Incoming**, or 
-     - **Accept Both**.
-   - After resolving, click **✔ Commit** to finish the merge.
