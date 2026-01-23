@@ -12,22 +12,28 @@ commands and its directory structure.
 
 ## Learning Resources
 
-1.  Downloading and installing Git
-    1.  <https://git-scm.com/install/>
-> N.B. Mac and Linux systems may already have git
-1. Download and Install Docker
-    1.  <https://www.docker.com/products/docker-desktop/>
-        1. Choose the one suitable for your machine
-        2. May ask you to register, 
-        3. Must always run in the background
-2.  Enabling Windows Sub System for Linux
+1. For **Windows OS**: Install and enable Windows Sub System for Linux (WSL)
+   1. Open PowerShell in administrator mode by right-clicking and selecting "Run as administrator".
+   2. Type the `wsl --install` command, then restart your machine.
+   3. <https://learn.microsoft.com/en-us/windows/wsl/install>
+   4. **N.B. Nothing to do for Mac and Linux OS**
+2.  Downloading and installing Git
+    1. <https://git-scm.com/install/>
+    2. **N.B. Mac and Linux systems may already have git**
+3. [Download and Install Docker](https://www.docker.com/products/docker-desktop/)
+     1. Choose the one suitable for your machine
+     2. May ask you to register, 
+     3. Must always run in the background
+        1. Run the docker program/app
+        2. ***Windows may open a CMD for the first time. Hit enter and allow it to run on the background***
+4.  Enabling Windows Sub System for Linux
     1.  <https://learn.microsoft.com/en-us/windows/wsl/install>
-3.  Download and install VSCode
+5.  Download and install VSCode
     1.  <https://code.visualstudio.com/download>
-4.  Access your Github Account: **signin** or **signup**
+6.  Access your Github Account: **signin** or **signup**
     1.  <https://github.com/join>
 
-5. **For Mac users: download and install Microsoft Remote Desktop** 
+7. **For Mac users: download and install Microsoft Remote Desktop** 
    a. [Windows App](https://apps.apple.com/app/microsoft-remote-desktop/id1295203466).
 
 ## Environment 

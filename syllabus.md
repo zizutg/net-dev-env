@@ -3,14 +3,14 @@
 | Topics                                                       | Date      |
 |--------------------------------------------------------------|-----------|
 | Fundamentals of Linux                                        | 1/26/2026 |
-| Users, Groups and Permissions in Linux                      | 1/28/2026 |
+| Users, Groups and Permissions in Linux                       | 1/28/2026 |
 | Lab 01: Configuration & Setup                                | 1/30/2026 |
 | Lab 02: Linux system                                         | 1/30/2026 |
 | IPv4: Address, Notation, Classes                             | 2/2/2026  |
 | Routing & Forwarding basics                                  | 2/4/2026  |
 | Lab 03: IP Addressing                                        | 2/6/2026  |
 | Lab 04: Subnets and Routing                                  | 2/6/2026  |
-| Internet Components and Connections systems                   | 2/9/2026  |
+| Internet Components and Connections systems                  | 2/9/2026  |
 | Switching, Delays & Layering                                 | 2/11/2026 |
 | Lab 05: Emulating and Examining the Internet                 | 2/13/2026 |
 | Lab 06: Network Delays                                       | 2/13/2026 |
@@ -21,11 +21,11 @@
 | HTTP Protocol                                                | 2/23/2026 |
 | Deployment & Caching                                         | 2/25/2026 |
 | Lab 09: Web Developer Tools & HTTP Protocol                  | 2/27/2026 |
-| Lab 10: Local Caching                                       | 2/27/2026 |
+| Lab 10: Local Caching                                        | 2/27/2026 |
 | Secure Communication & Electronic Mail                       | 3/2/2026  |
 | Data Centers & Internet Calls over SIP                       | 3/4/2026  |
-| Lab 11: Secure & Persistent Communication                    | 2/27/2026 |
-| Lab 12: Email & Dynamic Web                                  | 2/27/2026 |
+| Lab 11: Secure & Persistent Communication                    | 3/6/2026 |
+| Lab 12: Email & Dynamic Web                                  | 3/6/2026 |
 | Transport Layer: TCP & UDP                                   | 3/9/2026  |
 | Connectionless vs. Connection Oriented                       | 3/11/2026 |
 | Lab 13: UDP Protocol & Checksum                              | 3/13/2026 |
@@ -34,7 +34,7 @@
 | Spring Break - No Class                                      | 3/18/2026 |
 | Spring Break - No Class                                      | 3/20/2026 |
 | Spring Break - No Class                                      | 3/20/2026 |
-| TCP: Connection Management                                    | 3/23/2026 |
+| TCP: Connection Management                                   | 3/23/2026 |
 | TCP: Reliability                                             | 3/25/2026 |
 | Lab 15: TCP Connection & Segmentation                        | 3/27/2026 |
 | Lab 16: TCP four way handshake & Retransmission              | 3/27/2026 |
