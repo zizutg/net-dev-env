@@ -47,15 +47,13 @@ You may not fully understand what is going on?
 - That's ok. You don't need to understand how the engine work to learn driving
 
 `IDEs` (Integrated Development Environments) to makes practice and  development easy.
-- Consider this analogy to understand IDEs
-  - **The relationship between Tools and Homes**
-    ><img src="images/Tools_vs_House.png">
-  - **The relationship between IDE and Project**
-    ><img src="images/IDE_vs_SW.png">
+- Consider this analogy to understand the relationship between programs and IDEs
+  - Although we might not write code we compile and run existing code
+    ><img src="images/cooking-vs-code.png">
 - But most program development is team sport, here instructor and student are in a team
   - Git and GitHub allows the team to track the status of each memeber, e.g. what each member is updating
-  - Docker makes sure each member, virtually, is playing on the same field 
-  - So what is GL: an old field we use from time to time
+  - Docker makes sure each member, virtually, is playing on the same tool 
+  - So what is GL: an old tool we use from time to time
     - Might be discarded in the future
   ><img src="images/dev-git-gl.png" width="75%">
 
