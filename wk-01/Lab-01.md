@@ -1,5 +1,5 @@
 # Lab 01 - Configuration, Linux Overview and Basic Commands
-
+><h3> FOR ANY LAB TAKE ABOUT 10 MINUTES TO READ AND UNDERSTAND INSTRUCTION DOCUMENT BEFORE ATTEMPTING TO BUILD ANYTHING.</h3>
 This exercise provides hands-on experience with using Linux, basic
 commands and its directory structure.
 
