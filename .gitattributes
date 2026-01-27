@@ -1,3 +1,4 @@
 *.docx  binary diff=docx
 *.xlsx  binary diff=xlsx
 *.pdf  binary diff=pdf
+*.pptx binary diff=pptx
