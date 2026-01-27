@@ -7,12 +7,6 @@ This exercise provides basic understanding of users in a Linux system, grouping 
 -   Understand basics of Linux users.
 -   Understand basics of Linux groups
 
-## Learning Resources
-
-1.  Understanding password hashing
-
-    -   https://www.cyberciti.biz/faq/understanding-etcshadow-file/
-
 ## Environment 
 
 Access to a Linux system created in Lab 01, either via remote desktop or SSH.
@@ -335,4 +329,14 @@ To modify the student group ACL of file1.txt
 
 ## Summary
 
-In this exercise, we have learnt working with creating users, changing the password and managing software packages including installing and removing these. In addition, we practiced with user and group permissions.
+In this exercise, 
+- we have learnt working with creating users, 
+- changing the password and 
+- managing software packages including installing and removing these. 
+- In addition, we practiced with user and group permissions.
+
+## Learning Resources
+
+1.  Understanding password hashing
+
+    -   https://www.cyberciti.biz/faq/understanding-etcshadow-file/

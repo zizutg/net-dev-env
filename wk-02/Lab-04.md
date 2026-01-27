@@ -11,16 +11,6 @@ This exercise provides overview of docker containers and their use in creating v
 - Understand use of docker containers
 - Create network scenarios using docker containers
 
-## Learning Resources
-
--   Understand IP Addressing: Everything you ever wanted to know
-    -   https://ia800606.us.archive.org/21/items/B-001-002-066/501302.pdf
--  Understand docker containers
-    - https://www.docker.com/
-    - https://www.docker.com/products/docker-desktop
--   Computer Networks - A Top Down Approach, v8, Kurose, Ross; Pearson
-    publishing
-
 ## Environment 
 
 The majority of our networking exercises will be carried out in a docker based environment using Docker Desktop. Docker Desktop is an application environment for your laptop environment that enables to run containerized applications. The Docker Desktop integrates and provides access to a vast ecosystem of docker images via Docker Hub. Using this application, we will create majority of our networking scenarios and understand working of networking protocols.
@@ -361,11 +351,19 @@ WARN[0000] /Users/zee/Library/CloudStorage/GoogleDrive-zyalew@umbc.edu/My Drive/
 ## Summary
 
 In this exercise, we have studied and learnt the following
-1. Assignment of an IP Address to a host
-2. Assignment of multiple IP Address to a host
-3. Assignment of multiple IP addresses to a single interface of a host.
-4. Creating LANs with and without routers
-5. Configuration of routing tables in a router and host
-6. Study of routing table structure in a network router.
+- Assignment of an IP Address to a host
+- Assignment of multiple IP Address to a host
+- Assignment of multiple IP addresses to a single interface of a host.
+- Creating LANs with and without routers
+- Configuration of routing tables in a router and host
+- Study of routing table structure in a network router.
 
+## Learning Resources
 
+-   Understand IP Addressing: Everything you ever wanted to know
+    -   https://ia800606.us.archive.org/21/items/B-001-002-066/501302.pdf
+-  Understand docker containers
+    - https://www.docker.com/
+    - https://www.docker.com/products/docker-desktop
+-   Computer Networks - A Top Down Approach, v8, Kurose, Ross; Pearson
+    publishing

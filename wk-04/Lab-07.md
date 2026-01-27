@@ -11,10 +11,6 @@ This exercise provides insights into using Wireshark to analyze packets at each 
 - Understand packet encapsulation and decapsulation during packet
     transmission when using the network protocols stack.
 
-## Learning Resources
-
-- https://www.wireshark.org/docs/wsug_html_chunked/ChapterIntroduction.html
-
 ## Environment 
 
 This exercise involves using your laptop and Wireshark to dissect packet at each layer of network stack in both the cases of live capture as well as reading from .pcap file. In addition, we explore the built-in utilities, such as nslookup to study DNS resolution process.
@@ -44,41 +40,31 @@ Wireshark Preference Appearance Layout(select layout)
     <img src="images/shark-3.png">
 
 - The packet detail pane shows the full TCP/IP protocol stack i.e. Ethernet, Internet Protocol, TCP protocol and HTTP protocol. Expand HTTP protocol and it will show all of HTTP headers for this HTTP Request. Identify the website being accessed from the request header "Host: httpforever.com".
-
 - Analyze contents of each header. Note that each header is terminated by "\\r\\n" i.e., Carriage Return Line Feed as per the protocol specifications of HTTP. When the header is terminated by single "\\r" or "\\n", it is not consistent with HTTP protocol specifications and some web servers may respond with Error response "400 Bad Request".
-
 - Analyze header details of other protocols, such as, TCP, IP or Ethernet.
-
 - Save the entire capture in a file `httpforever.pcap` (choose your filename)
 
 ### Network layer Analysis of Live capture of Ping traffic
 
 - Restart wireshark capture with capture filter as `icmp`.
-
 - Open a terminal window and enter `ping -c4 google.com`
-
 - Stop the wireshark capture after it shows few packets. A sample capture is shown in ??
 
 <img src="images/shark-4.png">
 
 - Select first packet or any packet and analyze the protocols displayed in the Packet Details pane. It will show 3 protocol, namely, Ethernet, IIP and ICMP. There is no TCP or HTTP protocol in these capture
-
 - Expand the ICMP packet details and analyze all the headers.
 
 ### Network layer Analysis of stored capture in a file
 
 - Open the earlier saved file `httpforever.pcap` in wireshark. We will explore few options in wireshark on this capture.
-
 - Explore protocol conversations. From the menu, select Statistics Conversations. An example is shown below: 
 
 <img src="images/shark-5.png">
 
 - In this capture, it shows 4 conversations for TCP, 1 for IPv4, 1 for Ethernet and none for UDP. It also shows other details i.e. number of packets, bytes in both directions. Scroll to right to see more details. Click on IPv4 or Ethernet protocol to see the details. Close this conversation
-
 - Analyse one of the 4 TCP conversations to see all the data in this connection. Select the first packet. Right click and select "Follow TCP Stream". As this connection has HTTP as higher layer protocol, it will pop up a window showing all the HTTP Data. Identify the TCP Connection details by studying source port number of the client. The display filter in Wireshark window will show 'tcp.stream eq 0'.
-
 - Clear the display filter by clicking cross mark ('X') on the right side of display filter to see the entire traffic.
-
 - Identify another packet with a different source port number and follow this TCP connection to see the HTTP data transferred on this TCP connection.
 
 ### Customizing Display Format and Columns
@@ -220,11 +206,14 @@ attribute i.e. validity period for caching such responses.
 
 In this exercise, we have studied and learnt the following
 
-1. Analyzing packets at each layer of network stack
-2. Customizing display layout of wireshark.
-3. Analyzing packet capture from a stored .pcap file
-4. Use of DNS resolution for simple name to IP Address mapping
-5. Use of DNS resolution to explore all record types in DNS resolution.
-6. Analyze DNS packet format and fields using wireshark.
+- Analyzing packets at each layer of network stack
+- Customizing display layout of wireshark.
+- Analyzing packet capture from a stored .pcap file
+- Use of DNS resolution for simple name to IP Address mapping
+- Use of DNS resolution to explore all record types in DNS resolution.
+- Analyze DNS packet format and fields using wireshark.
 
 
+## Learning Resources
+
+- https://www.wireshark.org/docs/wsug_html_chunked/ChapterIntroduction.html

@@ -9,16 +9,6 @@ This exercise provides overview of Layer 2 networking
 -   Understand use of wireshark
 -   Analyze network traffic using wireshark
 
-## Learning Resources
-
-Wireshark and tcpdump
--   <https://www.wireshark.org/>
--   tshark for windows
--   <https://www.tcpdump.org/>
--   <https://www.winpcap.org/windump/>
--   <https://npcap.com/#download>
--   <https://techcommunity.microsoft.com/blog/coreinfrastructureandsecurityblog/introduction-to-network-trace-analysis-part-1-asking-questions-and-collecting-da/3575496>
-
 ## Environment 
 
 A laptop running windows/MacOS/Linux with all tools and utilities installed. 
@@ -103,5 +93,15 @@ Share your saved file with another course participant and similarly, receive the
 ## Summary
 
 In this exercise, we have studied and learnt the following
-1.  Starting wireshark to capture live traffic and analyze1
-1.  Use wireshark to analyze already captured traffic.
+-  Starting wireshark to capture live traffic and analyze1
+-  Use wireshark to analyze already captured traffic.
+
+## Learning Resources
+
+Wireshark and tcpdump
+-   <https://www.wireshark.org/>
+-   tshark for windows
+-   <https://www.tcpdump.org/>
+-   <https://www.winpcap.org/windump/>
+-   <https://npcap.com/#download>
+-   <https://techcommunity.microsoft.com/blog/coreinfrastructureandsecurityblog/introduction-to-network-trace-analysis-part-1-asking-questions-and-collecting-da/3575496>

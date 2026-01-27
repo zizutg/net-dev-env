@@ -8,19 +8,8 @@ delays their various components, and real life delays (with delays when accessin
 ## Learning Objectives
 
 -   Understand basics of networking delay
+-   Understand components of delay, such as Transmission, Propagation and Queuing delay
 
--   Understand components of delay, such as Transmission, Propagation
-    and Queuing delay
-
-## Learning Resources
-
--   <https://media.pearsoncmg.com/ph/esm/ecs_kurose_compnetwork_8/cw/content/interactiveanimations/transmission-vs-propogation-delay/transmission-propagation-delay-ch1/index.html>
--   <https://media.pearsoncmg.com/ph/esm/ecs_kurose_compnetwork_8/cw/content/interactiveanimations/queuing-loss-applet/index.html>
--   <https://gaia.cs.umass.edu/kurose_ross/interactive/caravan.php>
--   <https://gaia.cs.umass.edu/kurose_ross/interactive/one-hop-delay.php>
--   <https://gaia.cs.umass.edu/kurose_ross/interactive/end-end-delay.php>
--   <https://www.speedtest.net/>
-- <https://www.webpagetest.org/>
 
 ## Environment 
 
@@ -155,8 +144,18 @@ For Chrome browser Web Developer Tools can be accessed as
 ## Summary
 In this exercise, we have studied and learnt the following
 
-1. Components that constitute end to end delay.
-2. Computation of Transmission, Propagation and Queuing delay.
-3. Computation of end to end delay
-4. Measuring the raw bandwidth of internet connection.
-5. Analyzing a website performance though Web developer tools in a browser or through web performance measurement sites e.g. <https://webpagetest.org>.
+- Components that constitute end to end delay.
+- Computation of Transmission, Propagation and Queuing delay.
+- Computation of end to end delay
+- Measuring the raw bandwidth of internet connection.
+- Analyzing a website performance though Web developer tools in a browser or through web performance measurement sites e.g. <https://webpagetest.org>.
+
+## Learning Resources
+
+-   <https://media.pearsoncmg.com/ph/esm/ecs_kurose_compnetwork_8/cw/content/interactiveanimations/transmission-vs-propogation-delay/transmission-propagation-delay-ch1/index.html>
+-   <https://media.pearsoncmg.com/ph/esm/ecs_kurose_compnetwork_8/cw/content/interactiveanimations/queuing-loss-applet/index.html>
+-   <https://gaia.cs.umass.edu/kurose_ross/interactive/caravan.php>
+-   <https://gaia.cs.umass.edu/kurose_ross/interactive/one-hop-delay.php>
+-   <https://gaia.cs.umass.edu/kurose_ross/interactive/end-end-delay.php>
+-   <https://www.speedtest.net/>
+- <https://www.webpagetest.org/>

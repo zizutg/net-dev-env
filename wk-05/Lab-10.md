@@ -246,10 +246,10 @@ Study the vulnerability of `If-Modified-Since` request header and why `Etag` is 
 
 In this exercise, we have learnt the following
 
-1. Use of HTTP status codes
-2. Browser behaviour in rendering the contents as per Status codes.
-3. Use of HTTP of status code 304
-4. Use of Headers HTTP headers used for caching by the browser.
+- Use of HTTP status codes
+- Browser behaviour in rendering the contents as per Status codes.
+- Use of HTTP of status code 304
+- Use of Headers HTTP headers used for caching by the browser.
 
 ## Learning Resources
 

@@ -5,23 +5,8 @@ This exercise provides basic understanding of IP addressing.
 ## Learning Objectives
 
 -   Understand IP address configuration on host (Linux, Mac, Windows)
-
 -   Understand subnetting of IP addresses
-
 -   Become familiar with basic network utilities: ping, traceroute
-
-## Learning Resources
-
--   Understand IP Addressing: Everything you ever wanted to know
-
-    -   https://ia800606.us.archive.org/21/items/B-001-002-066/501302.pdf
-
--   Computer Networks - A Top Down Approach, v8, Kurose, Ross; Pearson
-    publishing
-
--   Interactive Exercises : Chap 04
-
-    -   https://gaia.cs.umass.edu/kurose_ross/interactive/
 
 ## Environment 
 
@@ -141,7 +126,15 @@ Warning: This is for educational demonstration only. Do NOT expose this to publi
 
  In this exercise, we have studied and learnt the following
 
-1. Assignment of IP Address upon connecting to internet.
-2. Checking reachability using ping
-3. Identifying all the routers from the device to chosen internet server e.g. google.com
+- Assignment of IP Address upon connecting to internet.
+- Checking reachability using ping
+- Identifying all the routers from the device to chosen internet server e.g. google.com
 
+## Learning Resources
+
+-   Understand IP Addressing: Everything you ever wanted to know
+    -   https://ia800606.us.archive.org/21/items/B-001-002-066/501302.pdf
+-   Computer Networks - A Top Down Approach, v8, Kurose, Ross; Pearson
+    publishing
+-   Interactive Exercises : Chap 04
+    -   https://gaia.cs.umass.edu/kurose_ross/interactive/

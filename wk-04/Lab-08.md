@@ -7,15 +7,6 @@ This exercise provides basic overview of TCP and UDP as well as single and multi
 -   Overview TCP and UDP
 -   Understand single and multi-client servers
 
-## Learning Resources
-
-### Netcat and Ncat (Nmap) 
-
-- <https://linux.die.net/man/1/ncat>
-- <https://linux.die.net/man/1/ncat>
-- <https://www.docker.com/>
-- Lab-04 for docker instances
-
 ## Environment 
 
 This exercise involves using netcat to communicate between two or more applications on different hosts. The majority of our networking exercises will be carried out in a docker based environment using Docker Desktop. 
@@ -52,7 +43,6 @@ The option -k specifies that network server will continue to run when an earlier
 Access HB, open a terminal window and connect to this netcat server, which is HA. 
 
 - The client needs to specify the IP address and port number of the server. Assuming that IP address of HA is `172.21.45.5`, run the following command in the terminal window.
-
 - nc 172.21.45.5 3333
 
 This will establish the connection with netcat server. Now enter any text in client terminal and this will appear in server terminal window. Similarly, whatever you enter(type) in the server window will appear in client terminal window.
@@ -169,9 +159,17 @@ WARN[0000] /Users/zee/Library/CloudStorage/GoogleDrive-zyalew@umbc.edu/My Drive/
 
 ## Summary
 
-> In this exercise, we have studied and learnt the following
+In this exercise, we have studied and learnt the following
 
-1. Simple network communication using netcat (nc) utility
-2. Simple network communication using UDP with netcat (nc) utility.
-3. Group chat communication using ncat (from nmap family) as a broker to relay communications among all members of group.
+- Simple network communication using netcat (nc) utility
+- Simple network communication using UDP with netcat (nc) utility.
+- Group chat communication using ncat (from nmap family) as a broker to relay communications among all members of group.
 
+## Learning Resources
+
+### Netcat and Ncat (Nmap) 
+
+- <https://linux.die.net/man/1/ncat>
+- <https://linux.die.net/man/1/ncat>
+- <https://www.docker.com/>
+- Lab-04 for docker instances

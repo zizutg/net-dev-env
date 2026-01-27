@@ -186,22 +186,14 @@ The command `cd` changes the current directory to specified directory.
 - The command `pushd` stores the current directory information on stack and changes the current directory to specified destination. 
 - The command `popd` returns the directory which on top of the stack.
 
-- `$ pwd`
-    >*/home/student*
-- `$ pushd /home`
-    >*/home ~*
-- `$ pushd /var/log`
-    >*/var/log /home ~*
-- `$ pushd /tmp`
-    >*/tmp /var/log /home ~*
-- `$ popd`
-    >*/var/log /home ~*
-- `$ popd`
-    >*/home ~*
-- `$ popd`
-    >*~*
-- `$ popd`
-  >*-bash: popd: directory stack empty*
+- `$ pwd` >*/home/student*
+- `$ pushd /home` >*/home ~*
+- `$ pushd /var/log` >*/var/log /home ~*
+- `$ pushd /tmp` >*/tmp /var/log /home ~*
+- `$ popd` >*/var/log /home ~*
+- `$ popd` >*/home ~*
+- `$ popd` >*~*
+- `$ popd` >*-bash: popd: directory stack empty*
 - Change to parent directory (..)
   - `$ cd ..`
 - Explore other directory with relative paths
@@ -381,12 +373,12 @@ Most Git tasks for this course will be done **using the Source Control icon in V
 
 When your instructor pushes updates, you need to bring them into your fork and local copy:
 
-1. Click the **Source Control icon**.
-2. At the top, click the **... menu** (three dots).
-3. Select **Pull**: to simply get update from the origin
-   1. You can also use **Pull from ...** 
-4. VS Code will fetch changes and attempt to merge automatically.
-5. If there are conflicts, VS Code will highlight them:
+- Click the **Source Control icon**.
+- At the top, click the **... menu** (three dots).
+- Select **Pull**: to simply get update from the origin
+  - You can also use **Pull from ...** 
+- VS Code will fetch changes and attempt to merge automatically.
+- If there are conflicts, VS Code will highlight them:
    - Buttons will appear above each conflict: 
      - **Accept Current**, 
      - **Accept Incoming**, or 
