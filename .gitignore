@@ -81,7 +81,7 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-prof_resources/
+net_prof_res/
 fa25/
 
 # IPython
