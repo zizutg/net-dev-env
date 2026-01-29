@@ -66,6 +66,16 @@ Open VSCode and setup practice and development environment
 
 -   Click the **account icon** 👤 in the **bottom-left corner** of VS Code.
 -   Choose **Sign in with GitHub** and follow the prompts.
+  1. Git may ask you to authenticate your Github
+      1. Look for the git icon on the taskbar an authorize
+
+>***`Trouble shooting: You may need to restart you vscode and/or PC`***
+
+###  Clone the Class Example
+This is like copying the project on server to your computer
+1. ***`Open VSCode`***: access the **Command Palette** using `F1`
+   1. Or (`Ctrl + Shift + P` / `Cmd + Shift + P`)
+
 
 #### VS Code Extensions
 
@@ -81,7 +91,9 @@ following extensions:
 ####  Open VSCode and Clone the Class Example Repository
 
 1.  Open the **Command Palette** `F1 or (Ctrl + Shift + P / Cmd + Shift + P)`
-2.  Type Git Clone and select **Remote Resources**.
+2. Type `Git Clone` and select **Remote Resources**.
+   1. Git may ask you to authenticate your Github
+      1. Look for the git icon on the taskbar an authorize
 3.  Search for your project and click it.
     1. The project you accepted earlier
 4.  Choose a folder where you want your projects stored.
