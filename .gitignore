@@ -82,6 +82,9 @@ target/
 .ipynb_checkpoints
 
 net_prof_res/
+workshop/
+netweb/
+net-web/
 fa25/
 
 # IPython

@@ -1,0 +1,39 @@
+# Dockerfile for creating docker image for
+# ubuntu-22, curl, wget, net-tools, iputils
+
+FROM ubuntu
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt update
+
+RUN apt -y install vim nano
+RUN apt -y install net-tools 
+RUN apt -y install netcat-openbsd
+RUN apt -y install tcpdump 
+#RUN apt -y install iproute2
+#RUN apt -y install gcc
+RUN apt -y install iputils-ping 
+RUN apt -y install curl 
+
+# install postfix and dovecot
+RUN echo "postfix postfix/mailname string mymail.local" | debconf-set-selections && \
+    echo "postfix postfix/main_mailer_type string 'Internet Site'" | debconf-set-selections && \
+    echo "dovecot-core dovecot-core/create-ssl-cert boolean true" | debconf-set-selections && \
+    echo "dovecot-core dovecot-core/ssl-cert-name string mymail.local" | debconf-set-selections
+
+RUN apt-get install -y postfix dovecot-core dovecot-imapd dovecot-pop3d mailutils
+RUN sed -i 's/^myhostname \(.*\)/myhostname = mail.myweb.internal/' /etc/postfix/main.cf
+RUN echo "mydomain = myweb.internal" >>/etc/postfix/main.cf
+RUN sed -i 's/^mydestination \(.*\)/mydestination = $myhostname, $mydomain, localhost.$mydomain, localhost/' /etc/postfix/main.cf
+RUN echo "home_mailbox = Maildir/" >>/etc/postfix/main.cf
+RUN mkdir -p /etc/skel/Maildir
+RUN apt -y install dovecot-common 
+RUN service postfix restart
+
+# configure dovecot
+RUN echo "protocols = imap pop3" >>/etc/dovecot/dovecot.conf
+RUN sed -i 's/^mail_location \(.*\)/mail_location = maildir:~\/Maildir/' /etc/dovecot/conf.d/10-mail.conf
+RUN sed -i 's/^#disable_plaintext_auth = yes/disable_plaintext_auth = no/' /etc/dovecot/conf.d/10-auth.conf
+
+RUN service dovecot restart
+ENV DEBIAN_FRONTEND=dialog
