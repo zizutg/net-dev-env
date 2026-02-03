@@ -18,8 +18,30 @@ commands and its directory structure.
    3. <https://learn.microsoft.com/en-us/windows/wsl/install>
    4. **N.B. Nothing to do for Mac and Linux OS**
 2.  Downloading and installing Git
-    1. <https://git-scm.com/install/>
-    2. **N.B. Mac and Linux systems may already have git**
+    1. For windows users
+       - [Download Git](https://git-scm.com/downloads) and Install it
+       - Follow the default settings
+       - Verify installation:
+         ```bash
+         git --version
+         ```
+    2. For Mac users
+       - Open Terminal app
+       - Install Command Line Tools
+         - Type and hit return `xcode-select --install`
+           - May need password and agreement 
+           - Follow the instruction from the installer
+       - Verify Git Installation:
+         - Reopen terminal and type: `git --version`
+         - You should see something like: `git version 2.x.x`
+
+    3. Linux (Ubuntu) Installation
+    - Update System, open terminal
+    - Type this commands one after the other 
+      - `sudo apt update`
+      - `sudo apt install git`
+      - `git --version`
+
 3. [Download and Install Docker](https://www.docker.com/products/docker-desktop/)
      1. Choose the one suitable for your machine
      2. May ask you to register, 
