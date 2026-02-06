@@ -14,8 +14,11 @@ Access to a Linux system created in Lab 01, either via remote desktop or SSH.
 Note: If you closed the previous docker container you need:
 - Pull and run the image 
   - Or, Build and run the Docker Image: might take time
-- Use these credentials to access the system
-  - `ssh student@localhost:33900`
+- Accessing via remote desktop 
+  - `user name: student`
+  - `password: dps_repo`
+- If you are accessing it via SSH follow this steps
+  - `ssh student@localhost -p 2222`
   - `password: dps_repo`
 - unminimize the current image 
 
@@ -48,15 +51,12 @@ Setup a password for this user to be able to login
     >*Retype new password:*<br>
     >*passwd: password updated successfully*<br>
 
-This will create a password for this user /etc/shadow file and user
-should be able to login.
+This will create a password for this user /etc/shadow file and user should be able to login.
 
 - `student:~$ sudo grep testuser1 /etc/shadow`
     >*tuser1:\$y\$j9T\$mFx41HpSIc/3F49PwV6hf\$RI<br>WNJmn3q3dUeSPS4J6eRW4HnMFrYDe90BqxXtnj./:19976:0:99999:7:::*
 
-Change the attributes of this created user e.g. assign a name for
-identification information purposes and verify this name in /etc/passwd
-file.
+Change the attributes of this created user e.g. assign a name for identification information purposes and verify this name in /etc/passwd file.
 
 - `student:~$ sudo usermod -c "General Test User 1" testuser1`
 - `student:~$ grep testuser1 /etc/passwd`
@@ -76,9 +76,7 @@ work. From the testuser1 terminal, try the following commands
     > *testuser1 is not in the sudoers file. This incident will be reported.*<br>
     > *testuser1:~$*<br>
 
-For sudo privileged user account e.g. student, sudo command works
-fine. For first time invocation, enter the password of your privileged
-account. From the original terminal, where you logged in as student
+For sudo privileged user account e.g. student, sudo command works fine. For first time invocation, enter the password of your privileged account. From the original terminal, where you logged in as student
 
 - `student:~$ sudo whoami`
     >*[sudo] password for student:*<br>
@@ -97,8 +95,7 @@ You have all the root accesses. To exit from this
 
 ### Creating a user with sudo privileges
 
-Follow the above process to first create a normal user and then using
-the usermod command, add this created user to sudo group.
+Follow the above process to first create a normal user and then using the usermod command, add this created user to sudo group.
 
 - `student:~$ sudo useradd -m -s /bin/bash testuser2`
 - `student:~$ sudo passwd testuser2`
@@ -106,8 +103,7 @@ the usermod command, add this created user to sudo group.
     >*Retype new password:*<br>
     >*passwd: password updated successfully*<br>
 
-It is a recommended practice that users should change the password upon
-first login. Force the user to change the password upon first login.
+It is a recommended practice that users should change the password upon first login. Force the user to change the password upon first login.
 
 - `student:~$ sudo passwd -e testuser2`
     >*passwd: password expiry information changed.*<br>
@@ -157,13 +153,15 @@ Other commands that are useful in actual machines but might be hard to test on d
 ### Removing a user 
 
 To remove a user from the system, use userdel command.
+- For practice, create two additional users following the previous instructions
+  - `testuser3` and `testuser4`
+  - You may create one regular and one with sudo previvillage 
 
-The first command below simply removes the user from /etc/passwd but its
-home directory will continue to exist. The second command will remove
-the user as well as its home directory and all contents therein.
+The first command below simply removes the user from /etc/passwd but its home directory will continue to exist. 
+- `student:~$ sudo userdel testuser3`
 
-- `student:~$ sudo userdel testuser1`
-- `student:~$ sudo userdel -r testuser2`
+The second command will remove the user as well as its home directory and all contents therein.
+- `student:~$ sudo userdel -r testuser4`
 
 ### Installing softwares/packages
 
@@ -245,17 +243,24 @@ Create `permissions` directrory, then create 5 files inside the directory, chang
 - `student:~/mkdir permissions && cd permissions`
 - `touch file1.txt file2.txt file3.txt file4.txt file5.txt`
 - `ls -l`
-    > *total 0*
-    > *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file1.txt*
-    > *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file2.txt*
-    > *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file3.txt*
-    > *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file4.txt*
-    > *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file5.txt*
+    ```
+     *total 0*
+     *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file1.txt*
+     *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file2.txt*
+     *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file3.txt*
+     *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file4.txt*
+     *-rw-rw-r-- 1 student student 0 Dec 30 19:45 file5.txt*
+     ```
 
-Change the user of file1 to testuser1 and user as well as group of file2 to testuser1. Then list details again
+Change to the permissions directory using the `cd` command
+
+Change the user of file1 to testuser1 and user as well as group of file2 to testuser1.
 
 - `student:~/permissions$ sudo chown testuser1 file1.txt`
 - `student:~/permissions$ sudo chown testuser1:testuser1 file2.txt`
+
+ Then list details again
+
 - `student:~/permissions$ ls -l`
     > *total 0*<br>
     > *-rw-rw-r-- 1 testuser1 student   0 Dec 30 19:45 file1.txt*<br>

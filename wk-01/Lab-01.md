@@ -13,8 +13,10 @@ commands and its directory structure.
 ## Learning Resources
 
 1. For **Windows OS**: Install and enable Windows Sub System for Linux (WSL)
-   1. Open PowerShell in administrator mode by right-clicking and selecting "Run as administrator".
+   1. ***Search Command Prompt and right-click on it  "Run as administrator".***
    2. Type the `wsl --install` command, then restart your machine.
+      1. If that does not work: `wsl --install --web-download`
+      2. Or: `wsl --install --web-download -d Ubuntu`
    3. <https://learn.microsoft.com/en-us/windows/wsl/install>
    4. **N.B. Nothing to do for Mac and Linux OS**
 2.  Downloading and installing Git
@@ -170,7 +172,7 @@ Credentials for accessing this host are set:
 3. In the **xrdp** enter the credentials
 4. Click Ok.
 
-### Using SSH
+### Using SSH from VSCode Terminal (Or any other shell)
 
 If you'd rather use a terminal: `ssh student@localhost -p 2222`
 
