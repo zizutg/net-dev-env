@@ -138,7 +138,7 @@ following extensions:
 
 - This is the easiest to do. From the project directory:
 
-> - `docker run -d --rm -p 33900:3389 -p 2222:22 --name ub22-host zizutg/multi-ub22-host:latest`
+> - `docker run -d --rm --dns 8.8.8.8 -p 33900:3389 -p 2222:22 --name ub22-host zizutg/multi-ub22-host:latest`
 
 ##### ‼️OR‼️ Build and run the Docker Image: might take time
 

@@ -37,7 +37,7 @@ Consider a simple network with 4 hosts
 To create this network:
 - Open your terminal, and enter the following command. 
   - Make sure you are the directory containing YAML files
-- `$ docker-compose -f ./util/yml/multi-net4-LAN-4H.yml up -d`
+- `$ docker compose -f ./util/yml/multi-net4-LAN-4H.yml up -d`
 ```
     [+] Running 6/6
     ✔ Network wk-02_net-1  Created                  0.0s 

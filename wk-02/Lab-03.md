@@ -52,10 +52,11 @@ in Windows 11.
 > <h1>REVERSE TO DHCP AFTER PRACTICE</h1>
 
 ### Internet Reachability and traceroute
-
+<!---- Make them use the docker host created earlier but run it with dns --8.8.8.8  and they can practice all of this linux terminal---->
 1.  Connect to UMBC Public network e.g. "UMBC Visitor" and reset your network configuration to DHCP.
 1.  Check reachability (ping) to google.com or any other website. This should be successful.
-    1.  `ping -c6 www.google.com` 
+    1.  Linux `ping -c6 www.google.com` 
+    2.  Windows `ping -n 6 www.google.com` 
 2.  Identify each IP router connecting you to google. 
     1.  Use the following command to list all the routers between your device and google.com
         - On Macbook/Linux: `traceroute -n www.google.com`
@@ -63,20 +64,23 @@ in Windows 11.
 
 
 ### Exploring Ncat — A Versatile Networking Tool
-
+<!-- Remove the windows and linux installation ask them to run the docker in such a way that it is reachable from the outside via port.
+THe windows and mac os versions need to be deleted-->
 Installation Instructions
 
 - Windows
   1. Visit: https://nmap.org/download  
   2. Download and install **Nmap for Windows** (Ncat is included).
-  3. Open **Command Prompt** or **PowerShell** and verify: `ncat --version`
+     1. May need to restart your machine 
+  3. Open **Command Prompt** and verify: `ncat --version`
+     1. Check if you are actually using ***command prompt not powershell*** as vscode terminal
 
 - Linux (Debian / Ubuntu)
-    1. Open a **Terminal** and install via CLI `sudo apt install nmap`
+    1. Open a **Terminal** and install via CLI `sudo apt install ncat`
     2. Verify via: `ncat --version`
 
 - macOS
-    1. Open a **Terminal** and install via CLI `brew install nmap`
+    1. Open a **Terminal** and install via CLI `brew install ncat`
     2. Verify via: `ncat --version`
 
 Note: macOS and Linux include a basic `nc`, but `ncat` provides additional features.
@@ -111,7 +115,12 @@ Observe the HTML response from the server.
 
 1. Observe the script inside `hello.html`:
 2. From Terminal, run Ncat as a web server: `ncat -l localhost 8080 < hello.html`
-1. Open a browser and visit:`http://localhost:8080`
+   1. Using **Command Prompt on windows**
+3. Open a browser and visit:`http://localhost:8080`
+
+Unfortunately, on windows machines, you may need to run the server after loading the site once. 
+- 100% of the market for the top 500 supercomputers.
+- Linux holds a 63.1% overall server share
 
 #### Remote Shell Access (Demonstration Only)
 
