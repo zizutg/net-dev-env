@@ -1,0 +1,45 @@
+# Dockerfile for creating docker image for
+# ubuntu-22, gcc, curl, wget, net-tools, iputils, python3, ssh
+
+FROM ubuntu
+
+RUN apt update
+
+RUN apt -y install vim nano
+RUN apt -y install net-tools 
+RUN apt -y install netcat-openbsd
+RUN apt -y install tcpdump 
+RUN apt -y install iproute2
+RUN apt -y install python3
+RUN apt -y install python3-websockets
+
+RUN apt -y install apache2
+RUN apt -y install libapache2-mod-wsgi-py3
+RUN apt -y install iputils-ping mtr-tiny dnsutils
+RUN apt -y install curl 
+#RUN apt -y install wget
+RUN apt -y install w3m
+
+RUN ln -sf /usr/bin/python3 /usr/local/bin/python
+
+RUN mkdir -p /usr/lib/cgi-bin
+COPY html/ /var/www/html/
+COPY cgi-bin/ /usr/lib/cgi-bin/
+COPY bin/start.sh /usr/local/bin
+RUN chmod +x /usr/local/bin/start.sh
+
+RUN mkdir -p /Programs
+COPY Programs/ /Programs
+RUN echo '<Location "/server-status">' >>/etc/apache2/apache2.conf
+RUN echo '  SetHandler server-status' >>/etc/apache2/apache2.conf
+RUN echo '  Require local' >>/etc/apache2/apache2.conf
+RUN echo '</Location>' >>/etc/apache2/apache2.conf
+COPY conf/000-proxy.conf /etc/apache2/sites-available/000-default.conf
+
+RUN a2enmod cgi
+RUN a2enmod proxy
+RUN a2enmod proxy_http
+RUN a2enmod proxy_wstunnel
+RUN a2enmod status
+
+CMD ["/usr/local/bin/start.sh"]

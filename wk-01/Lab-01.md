@@ -11,7 +11,12 @@ commands and its directory structure.
 - Understand program execution
 
 ## Learning Resources
-
+0. Identify your system properties
+   1. Windows: Press Win + R, type msinfo32, and hit Enter.
+      1. If it does not show ARM then it is AMD
+   2. macOS: Click Apple Logo > "About This Mac".
+      1. M1, M2 or any MX is a Silicon cheap 
+   3. Linux: Settings > About, or lscpu in terminal. 
 1. For **Windows OS**: Install and enable Windows Sub System for Linux (WSL)
    1. ***Search Command Prompt and right-click on it  "Run as administrator".***
    2. Type the `wsl --install` command, then restart your machine.
