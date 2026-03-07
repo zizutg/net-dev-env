@@ -207,8 +207,10 @@ The problem with this is everyone on the network can receive every ping.
 - To check this see the tcp dump of H3, while H2 is pinging H1 
 #### Shut down the network
 
+
+Shut down the network from local machine terminal using this command
+  - `docker compose -f ./util/yml/multi-net4-LAN-4H.yml  down --remove-orphans`
 ```
-(base) zee@Mac wk-02 % docker compose -f ./util/yml/multi-net4-LAN-4H.yml  down --remove-orphans
 [+] Running 6/6
  ✔ Container H4         Removed                 10.4s 
  ✔ Container H3         Removed                 10.6s 
@@ -216,18 +218,18 @@ The problem with this is everyone on the network can receive every ping.
  ✔ Container H2         Removed                 10.5s 
  ✔ Network wk-02_net-1  Removed                  0.5s 
  ✔ Network wk-02_net-2  Removed                  0.3s 
-(base) zee@Mac wk-02 % docker network prune -f 
 ```
+- Remove remaining background processes
+  - `docker network prune -f `
 
 ### A network with Router
 
 Create a simple network of four hosts connected via two routers.
 <img src="images/2r4h.png" alt="alt text">
 
-Open your terminal, go to the directory containing YAML files and enter the following command: `docker compose -f ./util/yml/multi-net4-2R4H.yml up `
-- In this case the wk-02 directory
-    ```
-    (base) zee@Mac wk-02 % docker compose -f ./util/yml/multi-net4-2R4H.yml up -d                
+Open your terminal, create a network using following command: 
+- `docker compose -f ./util/yml/multi-net4-2R4H.yml up `
+    ```                
     WARN[0000] /Users/zee/Library/CloudStorage/GoogleDrive-zyalew@umbc.edu/My Drive/Courses/CMSC481/class-repo/wk-02/multi-net4-2R4H.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
     [+] Running 9/9
     ✔ Network wk-02_net4-46  Created       0.0s 
@@ -239,15 +241,13 @@ Open your terminal, go to the directory containing YAML files and enter the foll
     ✔ Container R1           Started       0.9s 
     ✔ Container HA           Started       0.8s 
     ✔ Container HC           Started       0.9s 
-    (base) zee@Mac wk-02 % 
     ```
 - Check that all containers are up and running: `$ docker ps`
 
 - You can check reachability between hosts i.e., and it verify. 
+  - Access the host using: `docker exec -it HA bash`
+  - Run the commands below to check reachability
     ```
-    (base) zee@Mac wk-02 % docker exec -it HA bash
-    root@HA:/# -c2 172.21.47.5 and traceroute 172.21.47.5
-    bash: -c2: command not found
     root@HA:/# ping -c2 172.21.47.5 && traceroute 172.21.47.5
     PING 172.21.47.5 (172.21.47.5) 56(84) bytes of data.
     64 bytes from 172.21.47.5: icmp_seq=1 ttl=62 time=1.51 ms
@@ -331,9 +331,9 @@ Open your terminal, go to the directory containing YAML files and enter the foll
    
     ```
 
-Shut down the network
+Shut down the network from local machine terminal using this command
+  - `docker compose -f ./util/yml/multi-net4-2R4H.yml down --remove-orphans`
 ```
-(base) zee@Mac wk-02 % docker compose -f ./util/yml/multi-net4-2R4H.yml down --remove-orphans
 WARN[0000] /Users/zee/Library/CloudStorage/GoogleDrive-zyalew@umbc.edu/My Drive/Courses/CMSC481/class-repo/wk-02/multi-net4-2R4H.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
 [+] Running 9/9
  ✔ Container HC           Removed                   10.6s 
@@ -344,9 +344,10 @@ WARN[0000] /Users/zee/Library/CloudStorage/GoogleDrive-zyalew@umbc.edu/My Drive/
  ✔ Container R2           Removed                   10.6s 
  ✔ Network wk-02_net4-45  Removed                    0.2s 
  ✔ Network wk-02_net4-46  Removed                    0.3s 
- ✔ Network wk-02_net4-47  Removed                    0.5s 
-(base) zee@Mac wk-02 % docker network prune -f ./util/yml/ 
+ ✔ Network wk-02_net4-47  Removed                    0.5s  
 ```
+- Remove remaining background processes
+  - `docker network prune -f `
 
 ## Summary
 

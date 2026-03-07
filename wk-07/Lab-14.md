@@ -1,343 +1,390 @@
-UDP Checksum and Group Chat
+# Lab 14: UDP
 
-# Overview
+This exercise provides basic overview of UDP Protocol, its message
+delivery as well as checksum.
 
-This exercise provides basic overview of UDP CheckSum.
+## Learning Objectives
 
-# Learning Objectives
-
+- Understand UDP Message Oriented Delivery
+- Understand Unreliability of UDP
 - Understand UDP Checksum
-
 - Understand Server communication with multiple clients
 
-# Learning Resources
+## Environment
 
-## RFCs
+Docker Desktop, which is an application environment for your laptop environment that enables running of containerized applications. 
+- The Docker Desktop integrates and provides access to a vast ecosystem of docker images via Docker Hub.
 
-- RFC 768: User Datagram Protocol
+To access web content, use of Firefox browser is recommended as it provides easier support to dissect and analyse web request and response.
 
-- RFC 1071: Computing The Internet Checksum
+To capture real life packets use wireshark.
 
-# Environment
+## Description
 
-Docker Desktop, which is an application environment for your laptop
-environment that enables
+> #### Creating Simple Network
 
-running of containerized applications. The Docker Desktop integrates and
-provides access to a
 
-vast ecosystem of docker images via Docker Hub.
+Create a simple network of four hosts connected via two routers.
+<img src="images/2r4h.png" alt="alt text">
 
-To access web content, use of Firefox browser is recommended as it
-provides easier support to
+Open your terminal, create a network using following command: 
+- `docker compose -f ./util/yml/multi-net4-2R4H.yml up -d`
 
-dissect and analyse web request and response.
+Check that all the four containers are up and running. The below command
+will show
+- `docker ps`
 
-# Description
+From HA, ping HB and it should be successful.
+- `docker exec -it HA ping -c2 172.21.47.5`
 
-## Checksum computation
+### Simple UDP Communication
 
-![[]{#_Ref204498473 .anchor}Figure 1: UDP packet
-Format](media/image1.png){width="2.781178915135608in"
-height="2.0742957130358706in"}
+#### Start UDP Server on HB
 
-Each UDP packet has 2 bytes (16 bits) checksum field which provides
-basic integrity check to detect packet corruption during transmission
-over the network. The computation of checksum involves use of pseudo
-headers as shown in [Figure 1](#_Ref204498473) (grayed area) along with
-UDP headers and data. Checksum is computed taking 2 bytes at a time,
-performing a simple addition, adding any overflow bits and then
-computing one's complement.
+Access HB: `docker exec -it HB bash`
 
-## Checksum in Real Life.
+start tcpdump capture with capture filter as UDP on HB
+- `root@HB:/# tcpdump -n -i eth0 -A udp`
 
-Using the UDP client program udp_client.py, sends 2 packets to any
-internet site. We need to use a real internet site as UDP checksum
-computation in general is disabled in a docker or VM Environment. Using
-these 2 packets, we will compute the checksum and verify the values in
-tcpdump packet capture. Before starting the client, program, start the
-packet capture of UDP packets with option -X to display all data in hex.
-A simple invocation of UDP Client sending 8 bytes data to website
-rprustagi.com (IP Address 103.120.176.124) on port 32768 is shown below.
+- Access HB in another terminal and tart UDP server program udp_server.py listening on port 9999 (option -p) with delay interval of 5 seconds (option -d) and buffer size of 10 (option -b). 
+- `root@HB:/# python3 Programs/udp_server.py -p 9999 -b 10 -d 5`
 
-\$ python3 udp_client.py -s rprustagi.com -p 32768 -c2 -b 8
 
-sending: @@@@@@@@
+#### Start UDP Client program on HA
 
-sending: AAAAAAAA
+Access the  docker instance HA on a third terminal
+: `docker exec -it HA bash`
 
-The first packet has ASCII Characters '@@@@@@@@', the corresponding
-value in hex code is 0x4040404040404040. The second packet 'AAAAAAAA'
-had the corresponding hex code as 0x4141414141414141.
+start UDP client program udp_client.py send 3 packets (option -c) to UDP server with buffer size of 5 (option -b) and delay interval of 2s (option -d) as shown below.
+- `python3 Programs/udp_client.py -s 172.21.47.5 -p 9999 -c 3 -d 2 -b 5`
 
-### Packet Capture
+This will send UDP packets of size 5 bytes to UDP server, as shown below
+```
+sending: @@@@@
+sending: AAAAA
+sending: BBBBB
+```
+The same will be received at UDP server host, but UDP server program will receive these at the interval of 5s and displayed as below along with the time stamp.
+```
+('172.21.45.5', 45750) 12:13:59.528 @@@@@
+('172.21.45.5', 45750) 12:14:04.531 AAAAA
+('172.21.45.5', 45750) 12:14:09.534 BBBBB
+```
 
-The packet capture using tcpdump of above two packets is shown below.
+Analyze the tcpdump capture on host HB where packets were received at the interval of 2 seconds, as can be seen by timestamp in tcpdump capture, but processed by application at the interval of 5 seconds.
+```
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+12:13:59.527871 IP 172.21.45.5.45750 > 172.21.47.5.9999: UDP, length 5 E..!..@.>.....-.../...'....S@@@@@
+12:14:01.529650 IP 172.21.45.5.45750 > 172.21.47.5.9999: UDP, length 5 E..!..@.>.....-.../...'....SAAAAA
+12:14:03.535715 IP 172.21.45.5.45750 > 172.21.47.5.9999: UDP, length 5 E..!..@.>.....-.../...'....SBBBBB
+```
+#### Understanding simple UDP Communication
 
-\$ sudo tcpdump -n -i en0 -X port 32768 and udp
+In this case, client sends 3 UDP message which are received by server
+and displayed by the server. This shows simple UDP communication.
 
-tcpdump: verbose output suppressed, use -v\[v\]\... for full protocol
-decode
+### UDP Message Oriented Delivery
 
-listening on en0, link-type EN10MB (Ethernet), snapshot length 524288
-bytes
+UDP is message oriented protocol. 
+- This implies that once a program makes a socket call to read the data, the network stack will deliver the entire packet to application. 
+- If the application reads lesser number of bytes, then remaining part of the message data will be discarded.
+- To study this behaviour, use the UDP server program as already running earlier or if it is aborted, then restart the server program with same paramters i.e. buffer size of 10.
 
-22:00:56.285458 IP 192.168.1.171.51047 \> 103.120.176.124.32768: UDP,
-length 8
+#### UDP Client Program with a larger buffer.
 
-0x0000: 4500 0024 68af 0000 4011 37d2 c0a8 01ab E..\$h\...@.7\.....
+Invoke the client program with buffer size of 25 and delay interval of 2 seconds. It will send 25 bytes message to UDP as shown in client machine as below.
+- `python3 Programs/udp_client.py -s 172.21.47.5 -p 9999 -c 3 -d 2 -b 25`
 
-0x0010: 6778 b07c c767 8000 0010 dd1c 4040 4040 gx.\|.g\...\...@@@@
+```
+12:21:29.468 sending: @@@@@@@@@@@@@@@@@@@@@@@@@
+12:21:31.471 sending: AAAAAAAAAAAAAAAAAAAAAAAAA
+12:21:33.474 sending: BBBBBBBBBBBBBBBBBBBBBBBBB
+```
 
-0x0020: 4040 4040 @@@@
+However, the packets displayed at UDP Server window will be as follows.
+```
+('172.21.45.5', 54920) 12:21:32.785 @@@@@@@@@@
+('172.21.45.5', 54920) 12:21:37.790 AAAAAAAAAA
+('172.21.45.5', 54920) 12:21:42.795 BBBBBBBBBB
+```
+This indicates that remaining 15 bytes of each of 3 messages were not
+processed by UDP server since it specified buffer size of 10 when
+receiving packets.
 
-22:01:01.298624 IP 192.168.1.171.51047 \> 103.120.176.124.32768: UDP,
-length 8
+#### Packet Capture of UDP Server
 
-0x0000: 4500 0024 0986 0000 4011 96fb c0a8 01ab E..\$\....@\...\....
+The tcpdump capture at server host still shows that all 25 bytes were
+received by network, though application processed only 10 bytes and
+remaining 15 bytes were discarded.
+```
+12:21:29.468427 IP 172.21.45.5.54920 > 172.21.47.5.9999: UDP, length 25 E..5.E@.>.Z>..-.../...'..!.g@@@@@@@@@@@@@@@@@@@@@@@@@
+12:21:31.472432 IP 172.21.45.5.54920 > 172.21.47.5.9999: UDP, length 25 E..5/.@.>.X...-.../...'..!.gAAAAAAAAAAAAAAAAAAAAAAAAA
+12:21:33.475381 IP 172.21.45.5.54920 > 172.21.47.5.9999: UDP, length 25 E..52.@.>.U...-.../...'..!.gBBBBBBBBBBBBBBBBBBBBBBBBB
+```
+#### Experimentation with buffer size and delay interval
 
-0x0010: 6778 b07c c767 8000 0010 d918 4141 4141 gx.\|.g\...\...AAAA
+Run client and server programs with different buffer sizes and delay
+intervals and explore the behaviour of UDP protocols w.r.t. message
+oriented delivery.
 
-0x0020: 4141 4141 AAAA
+### Unreliability of UDP Delivery
 
-The packet capture starts with IP header of 20 bytes followed by UDP
-headers of 8 bytes followed by 8 bytes of UDP message. Source IP Address
-is at offset 12 and given by 0xc0a801ab, which in Dotted Decimal
-Notation form is 192.168.1.171. Similarly, destination IP Address is at
-offset of 16 and given by 0x6778b07c, which in DDN is 103.120.176.124.
+To study the unreliability, we will introduce network disturbances. 
+- For example, when client program is running, bring down the network interface of router R1 for some duration and then restored it. 
+- You should experience that UDP client will continue to send the packets to server and since network is down, these packets will be lost. 
+- When network is restored, remaining packets will be delivered as in normal case.
 
-The UDP source port is at offset 20, given by c767 (in decimal 51047)
-and destination port is at offset 22, given by 8000 (decimal 32768). The
-UDP length field is at offset 24, with the value 0010 (decimal 16). The
-UDP length also includes length of header bytes and since UDP message is
-of length 8 bytes, then length field is 16 (8 bytes of message + 8 bytes
-of header).
+#### Start Client program with large number of packets.
 
-This is followed by UDP checksum value of 0xdd1c for first message, and
-0xd918 for the second message. In the next section we will manually
-compute these values to understand the checksum computation.
+Start the client program with packet count of 10 or more and delay interval of 10 seconds, as shown below. ***Do not wait for the sending to end. Go to the next step to turn the network down***
+- `root@HA:/# python3 Programs/udp_client.py -s 172.21.47.5 -p 9999 -c 10 -d 10 -b 25`
+```
+12:44:59.476 sending: @@@@@
+12:45:09.478 sending: AAAAA
+12:45:19.483 sending: BBBBB
+12:45:29.490 sending: CCCCC
+12:45:39.495 sending: DDDDD
+12:45:49.499 sending: EEEEE
+12:45:59.503 sending: FFFFF
+12:46:09.504 sending: GGGGG
+12:46:19.508 sending: HHHHH
+12:46:29.510 sending: IIIII
+12:46:39.516 sending: JJJJJ
+```
+#### Bring down the network
+
+Access R1 in another terminal: `docker exec -it R1 bash`
+
+Bring down its eth0 interface after client has sent at least 4 packets and same has been received by udp Server. 
+- `root@R1:/# ip link set dev eth0 down`
+
+Observer the UDP client. 
+- It will continue to send packets which will not be displayed by the received since these are lost by the network. 
+- After network has lost 3 or more packets, bring up this interface as shown below. 
+- You should see that now server will start receiving the packets. 
+- This shows the unreliability of UDP protocol.
+
+Bring up R1 eth0 interface 
+- `root@R1:/# ip link set dev eth0 up `
+
+
+- Given below is the UDP Server output which show that packets `"FFFFF"` and `"GGGGG"` were lost by the network.
+```
+('172.21.45.5', 58463) 12:44:59.476 @@@@@
+('172.21.45.5', 58463) 12:45:09.479 AAAAA
+('172.21.45.5', 58463) 12:45:19.485 BBBBB
+('172.21.45.5', 58463) 12:45:29.491 CCCCC
+('172.21.45.5', 58463) 12:45:39.496 DDDDD
+('172.21.45.5', 58463) 12:45:49.500 EEEEE
+('172.21.45.5', 58463) 12:46:31.579 IIIII
+('172.21.45.5', 58463) 12:46:39.517 JJJJJ
+```
+This shows the unreliability nature of UDP and there is no retransmission of packets by the network. 
+
+>***Everyone's result could deffer depending on when the router is stopped and started***
+
+
+### Server With Multiple Clients
+
+UDP is connection less protocols and thus if many clients send data to a server at the same time, it will receive and process data from all clients concurrently in the order these packets arrive.
+
+Lets keep HB as a server and continue to connect to it from multiple clients
+#### Using Multiple UDP Clients
+
+Access host HA, HC, and  HD as on multiple terminals
+- Start sending messages using client program udp_client.py to this server concurrently. 
+- The server will receive and display the message from all clients concurrently. 
+- The 3 clients are invoked with buffer size of 4,6,8 respectively and different delay intervals of 2,3,4 as shown below. 
+- Each client sends about 5 packets as shown below.
+
+Client window 1:
+- `root@HA:/# python3 Programs/udp_client.py -s 172.21.47.5 -p 9999 -b 4 -d 2 -c 5`
+
+Client window 2:
+- `root@HC:/# python3 Programs/udp_client.py -s 172.21.47.5 -p 9999 -b 6 -d 3 -c 5`
+
+Client window 3:
+- `root@HD:/# python3 Programs/udp_client.py -s 172.21.47.5 -p 9999 -b 8 -d 4 -c 5`
+
+#### Server Processing and message display
+
+The server displays the data as received from multiple clients concurrently as below.
+```
+root@HB:/# python3 Programs/udp_server.py -p 9999 -b 10 -d 5
+('172.21.45.5', 44313) 17:18:54.877 @@@@
+('172.21.45.5', 46763) 17:18:59.881 @@@@@@
+('172.21.45.5', 44313) 17:19:04.884 AAAA
+('172.21.45.5', 46763) 17:19:09.890 AAAAAA
+('172.21.45.5', 37263) 17:19:14.895 @@@@@@@@
+('172.21.45.5', 44313) 17:19:19.901 BBBB
+('172.21.45.5', 46763) 17:19:24.904 BBBBBB
+('172.21.45.5', 37263) 17:19:29.906 AAAAAAAA
+('172.21.45.5', 44313) 17:19:34.912 CCCC
+('172.21.45.5', 46763) 17:19:39.916 CCCCCC
+('172.21.45.5', 37263) 17:19:44.918 BBBBBBBB
+('172.21.45.5', 44313) 17:19:49.922 DDDD
+('172.21.45.5', 46763) 17:19:54.926 DDDDDD
+('172.21.45.5', 37263) 17:19:59.928 CCCCCCCC
+('172.21.45.5', 37263) 17:20:04.934 DDDDDDDD
+```
+
+Run your own combinations of multiple clients with different buffer size, delay intervals, packet counts and explore and understand working of UDP message delivery.
+
+
+
+#### Packet Capture Analysis
+
+Repeat the exercise, but along with start the packet capture on both host HA and host HB. Host HA packet capture will show transmission of all packets whereas packet capture at host HB will host only those packets received by server.
+
+Complete this by shutting down the networ
+- `docker compose -f util/yml/multi-net4-2R4H.yml down --remove-orphans`
 
 ### Checksum computation
 
-As per checksum computation shown in [Figure 1](#_Ref204498473), The
-check sum for first UDP message is computed as follows. Note the value
-of UDP protocol in IP header is 0x11 (decimal 17). Also, the UDP length
-is counted twice in checksum computation.
+Each UDP packet has 2 bytes (16 bits) checksum field which provides basic integrity check to detect packet corruption during transmission over the network. 
+- The computation of checksum involves use of pseudo headers as shown in grayed area of the figure along with UDP headers and data. 
+- Checksum is computed taking 2 bytes at a time, performing a simple addition, adding any overflow bits and then computing one's complement.
 
-Sum = \[src IP first 2 bytes\] + \[src IP last 2 bytes\] + \[Dst IP
-first 2 bytes \] + \[Dst IP last 2 bytes\] + \[0, UDP protocol\] + \[UDP
-Len\] + \[Src UDP Port\] + \[Dst UDP Port\] + \[UDP Len\] + \[UDP msg
-bytes 0,1\] + \[UDP msg bytes 2,3\] + \[UDP msg bytes 4,5\] + \[UDP msg
-bytes 6,7\]
+<img src="images/checksum-1.png">
 
-= C0A8 (192.168) + 01AB (1.171) + 6778 (103.120) + B07C (176.124) + 0011
-(zero + UDP Protocol) + 0010 (UDP Length) + C767 (UDP Src Port) + 8000
-(UDP Dst Port) + 0010 (UDP Length) + 4040 (data bytes 0,1) + 4040 (data
-bytes 2,3) + 4040 (data bytes 4,5) + 4040 (data bytes 6,7)
+### Checksum in Real Life.
 
-= C0A8 + 01AB + 6778 + B07C + 0011 + 0010 + C767 + 8000 + 0010 + 4040 +
-4040 + 4040 + 4040 = 422DF
+For this we will use wireshark
+- Open the wireshark application and set the capture filter to `port 32768` and start capturing on your connected interface (E.g. en0)
 
-Adding the overflow bits back to 16 bits gives 22DF+4 = 22E3.
+Create a ubuntu host:
+- `docker run -it -d --name host -p 80:80 --rm zizutg/net-ub22-host`
 
-Performing 1's complete of 22E3 gives DD19, which is the value shown at
-offset 26 in tcpdump capture of first message.
+Access the host: `docker exec -it host bash`
 
-Similarly, checksum computation for 2^nd^ message is as follows.
+Using these 2 packets, we will compute the checksum and verify the values in wireshark packet capture. 
+-  A simple invocation of UDP Client sending 8 bytes data to website google.com (IP Address 142.250.217.4) on port 32768 is shown below.
+   -  Note that IP address of google can be different on your case, even from packet to packet due to DNS and/or Load Balancing
+- Using the UDP client program udp_client.py, sends 2 packets to any internet site. 
+- Access the the host in another terminal and run the udp client
+  - `root@ea7f1846e9d4:/# python3 Programs/udp_client.py -s google.com -p 32768 -c2 -b 8`
+```
+14:06:25.659 sending: @@@@@@@@
+14:06:30.696 sending: AAAAAAAA
+```
 
-Sum = C0A8 + 01AB + 6778 + B07C + 0011 + 0010 + C767 + 8000 + 0010 +
-4141 + 4141 + 4141 + 4141 = 426E3
+#### Analyzing the Packet Capture
 
-Adding the overflow bits back to 16 bits gives 26E3+4 = 26E7.
+Now observe the packet capture in wireshark:
 
-Performing 1's complete of 26E7gives D918, which is the values shown at
-offset 26 in tcpdump capture of second message.
+- The first packet has ASCII Characters `'@@@@@@@@`', the corresponding value in hex code is `0x4040404040404040`. 
+- The second packet `'AAAAAAAA'` had the corresponding hex code as `0x4141414141414141`.
 
-### Explore More Checksum computation
+<img src="images/checksum-2.png">
 
-Use netcat (ncat) utility to send UDP message on the network, capture
-tcpdump and verify that your computation matches with the value in
-packet capture.
+<img src="images/checksum-3.png">
 
-## Weakness of UDP Checksum.
+Notice two things:
+- The source IP is your actual machine IP since the container accessed google though that
+- The destination IP changed for two packets as google have different IPs 
+
+
+The packet capture starts with IP header of 20 bytes followed by UDP headers of 8 bytes followed by 8 bytes of UDP message. 
+- Source IP Address is at offset 12 and given by `0xc0a8 01a7` which in Dotted Decimal Notation form is IP 172.17.0.3 (`c0 = 192,  a8 = 168, 01 = 1, a7 = 167`) 
+- Similarly, destination IP Address is at offset of 16 and given by `0x8efb 2d44`, which in DDN is 142.251.45.68. 
+
+The UDP source port is at offset 20, given by `0xff0d` (in decimal 65293) and destination port is at offset 22, given by `0x8000` (decimal 32768). 
+- The UDP length field is at offset 24, with the value `0x0010` (decimal 16). 
+- The UDP length also includes length of header bytes and since UDP message is of length 8 bytes, then length field is 16 (8 bytes of message + 8 bytes of header).
+- This is followed by UDP checksum value of `0x0130` for first message, and `0x879a`for the second message. 
+
+In the next section we will manually compute these values to understand the checksum computation.
+
+#### Checksum computation
+
+As per checksum computation discussed earlier (using the grayed out are): 
+- The check sum for first UDP message is computed as follows. 
+- Note the value of UDP protocol in IP header is 0x11 (decimal 17). 
+- Also, the UDP length is counted twice in checksum computation.
+```
+Sum = [src IP first 2 bytes] + [src IP last 2 bytes] + 
+      [Dst IP first 2 bytes ] + [Dst IP last 2 bytes] + 
+      [0, UDP protocol] + [UDP Len] + [Src UDP Port] + 
+      [Dst UDP Port] + [UDP Len] + [UDP msg bytes 0,1] + 
+      [UDP msg bytes 2,3] + [UDP msg bytes 4,5] + [UDP msg bytes 6,7]
+```
+```
+    = C0A8 (192.168) + 01A7 (1.167) + 8EFB (142.251) + 2D44 (45.68) + 
+      0011 (zero + UDP Protocol) + 0010 (UDP Length) + FF0D (UDP Src Port) + 8000 (UDP Dst Port) + 0010 (UDP Length) + 4040 (data bytes 0,1) + 
+      4040 (data bytes 2,3) + 4040 (data bytes 4,5) + 4040 (data bytes 6,7)
+```
+```
+    = C0A8 + 01A7 + 8EFB + 2D44 + 0011 + 0010 + FF0D + 8000 + 0010 + 
+      4040 + 4040 + 4040 + 4040 = 3FECC
+```
+- Adding the overflow bits back to 16 bits gives `FECC + 0003 = FEC`F.
+
+- Performing 1's complete of `FECF` gives `0130`, which is the value shown at
+offset 26 in wireshark capture of first message.
+
+Similarly, checksum computation for $2^{nd}$ message is as follows.
+```
+Sum = C0A8 + 01A7 + 8EFB + D3C4 + 0011 + 0010 + CE1E + 8000 + 
+    0010 + 4141 + 4141 + 4141 + 4141 = 47861
+```
+Adding the overflow bits back to 16 bits gives `7861 + 0004 = 7865`.
+
+Performing 1's complement of `7865` gives `879a`, which is the value shown at
+offset 26 in wireshark capture of second message.
+
+
+### Weakness of UDP Checksum.
 
 The UDP Checksum mechanism is a simple sum addition mechanism and since
 addition follows the law of commutative sum, the data field can be
 manipulated to result in the same sum.
 
-For example, using UDP message of "ABCD" or "CDAB" or "ADCB" or "CABD"
-will result in same checksum values.
+- Given below are 3 transmissions of "ABCD", "CDAB" and "ADCB" using same source and destination IP address and port numbers.
+```
+root@ea7f1846e9d4:/# echo "ABCD" | ncat -u -p 16384 142.251.41.174 32768
+root@ea7f1846e9d4:/# echo "CDAB" | ncat -u -p 16384 142.251.41.174 32768
+root@ea7f1846e9d4:/# echo "ADCB" | ncat -u -p 16384 142.251.41.174 32768
+```
+#### Packet Capture using wireshark
 
-### Data Transmission using ncat
+For the 3 messages sent above, the packet capture is shown below.
+In all these 3 cases, the UDP Checksum value is same i.e., `0xa940`.
 
-Given below are 3 transmissions of "ABCD", "CDAB" and "ADCB" using same
-source and destination IP address and port numbers.
+<img src="images/checksum-4.png">
 
-\$\> echo \"ABCD\" \| ncat -u -p 16384 rprustagi.com 32768
+#### Additional examples of checksum weakness
 
-\$\> echo \"CDAB\" \| ncat -u -p 16384 rprustagi.com 32768
+Send data with prefix of "UQUQUQ" to any data text and you will notice that the checksum is same. 
+- For example, checksum value for sending "UQUQUQADCB" is same as that of sending "ADCB" as shown below in the packet capture.
+```
+root@ea7f1846e9d4:/# echo "UQUQUQABCD" | ncat -u -p 16384 142.251.41.174 32768
+root@ea7f1846e9d4:/# echo "ABCD" | ncat -u -p 16384 142.251.41.174 32768
+```
 
-\$\> echo \"ADCB\" \| ncat -u -p 16384 rprustagi.com 32768
+Analyze this packet capture and explore why this checksum happens to be same even though data length is same. 
+- Thus, it is to be noted that UDP checksum provides a simple mechanism for integrity checksum to identify corrupted packets during transmission and not a security mechanism to preserve integrity.
 
-\$\>
+#### Explore More Checksum computation
 
-### Packet Capture using tcpdump
+Use netcat (ncat) utility to send UDP message on the network, capture wireshark and verify that your computation matches with the value in packet capture.
 
-For the 3 messages sent above, the packet capture dump is shown below.
-In all these 3 cases, the UDP Checksum value is same i.e., 0xD704.
+- You may want to  exit the host and stop host for the next exercise at the port might conflict: `docker stop host`
 
-\$\> sudo tcpdump -n -i en0 -X port 32768 and udp
-
-tcpdump: verbose output suppressed, use -v\[v\]\... for full protocol
-decode
-
-listening on en0, link-type EN10MB (Ethernet), snapshot length 524288
-bytes
-
-10:31:59.741969 IP 192.168.1.171.16384 \> 103.120.176.124.32768: UDP,
-length 5
-
-0x0000: 4500 0021 9611 0000 4011 0a73 c0a8 01ab E..!\....@..s\....
-
-0x0010: 6778 b07c 4000 8000 000d d704 4142 4344 gx.\|@\...\....ABCD
-
-0x0020: 0a .
-
-10:32:11.963718 IP 192.168.1.171.16384 \> 103.120.176.124.32768: UDP,
-length 5
-
-0x0000: 4500 0021 2c60 0000 4011 7424 c0a8 01ab E..!,\`..@.t\$\....
-
-0x0010: 6778 b07c 4000 8000 000d d704 4344 4142 gx.\|@\...\....CDAB
-
-0x0020: 0a .
-
-10:32:23.064207 IP 192.168.1.171.16384 \> 103.120.176.124.32768: UDP,
-length 5
-
-0x0000: 4500 0021 fa59 0000 4011 a62a c0a8 01ab E..!.Y..@..\*\....
-
-0x0010: 6778 b07c 4000 8000 000d d704 4144 4342 gx.\|@\...\....ADCB
-
-0x0020: 0a .
-
-\^C
-
-\$\>
-
-### Additional examples of checksum weakness
-
-Send data with prefix of "UQUQUQ" to any data text and you will notice
-that the checksum is same. For example, checksum value for sending
-"UQUQUQADCB" is same as that of sending "ADCB" as shown below in the
-packet capture.
-
-10:34:41.012621 IP 192.168.1.171.16384 \> 103.120.176.124.32768: UDP,
-length 11
-
-0x0000: 4500 0027 60dd 0000 4011 3fa1 c0a8 01ab E..\'\`\...@.?\.....
-
-0x0010: 6778 b07c 4000 8000 0013 d704 5551 5551 gx.\|@\...\....UQUQ
-
-0x0020: 5551 4144 4342 0a UQADCB.
-
-\^C
-
-Analyze this packet capture and explore why this checksum happens to be
-same even though data length is same. Thus, it is to be noted that UDP
-checksum provides a simple mechanism for integrity checksum to identify
-corrupted packets during transmission and not a security mechanism to
-preserve integrity.
-
-## Server With Multiple Clients
-
-UDP is connection less protocols and thus if many clients send data to a
-server at the same time, it will receive and process data from all
-clients concurrently in the order these packets arrive.
-
-### Starting a server
-
-Create a simple network as shown below and start the UDP server.
-
-![](media/image2.png){width="5.623423009623797in"
-height="1.078423009623797in"}
-
-\$\> docker exec -it HB bash
-
-root@3b1914de3bf0:/# cd Programs
-
-root@3b1914de3bf0:/# python3 udp_server.py -p 9999 -b 10 -d 5
-
-### Using Multiple UDP Clients
-
-Open multiple terminals and login into host HA and start sending
-messages using client program udp_client.py to this server concurrently.
-The server will receive and display the message from all clients
-concurrently. The 3 clients are invoked with buffer size of 4,6,8
-respectively and different delay intervals of 2,3,4 as shown below. Each
-client sends about 5 packets as shown below.
-
-Client window 1:
-
-\# python3 udp_client.py -s 172.21.47.5 -p 9999 -b 4 -d 2 -c 5
-
-Client window 2:
-
-\# python3 udp_client.py -s 172.21.47.5 -p 9999 -b 6 -d 3 -c 5
-
-Client window 3:
-
-\# python3 udp_client.py -s 172.21.47.5 -p 9999 -b 8 -d 4 -c 5
-
-### Server Processing and message display
-
-The server displays the data as received from multiple clients
-concurrently as below.
-
-\# python3 udp_server.py -p 9999 -b 10 -d 5
-
-(\'172.21.45.5\', 60192) 15:06:57 @@@@
-
-(\'172.21.45.5\', 58089) 15:07:02 @@@@@@
-
-(\'172.21.45.5\', 60192) 15:07:07 AAAA
-
-(\'172.21.45.5\', 47835) 15:07:12 @@@@@@@@
-
-(\'172.21.45.5\', 60192) 15:07:17 BBBB
-
-(\'172.21.45.5\', 58089) 15:07:22 AAAAAA
-
-(\'172.21.45.5\', 60192) 15:07:27 CCCC
-
-(\'172.21.45.5\', 47835) 15:07:32 AAAAAAAA
-
-(\'172.21.45.5\', 58089) 15:07:37 BBBBBB
-
-(\'172.21.45.5\', 60192) 15:07:42 DDDD
-
-(\'172.21.45.5\', 47835) 15:07:47 BBBBBBBB
-
-(\'172.21.45.5\', 58089) 15:07:52 CCCCCC
-
-(\'172.21.45.5\', 58089) 15:07:57 DDDDDD
-
-(\'172.21.45.5\', 47835) 15:08:02 CCCCCCCC
-
-(\'172.21.45.5\', 47835) 15:08:07 DDDDDDDD
-
-Run your own combinations of multiple clients with different buffer
-size, delay intervals, packet counts and explore and understand working
-of UDP message delivery.
-
-# Summary
+## Summary
 
 In this exercise, we have learnt the following
 
-i.  UDP Checksum computation
+- Simple UDP Communication
+- Message oriented delivery of UDP
+- Unreliable delivery of UDP
+- UDP Checksum computation
+- Limitations of UDP Checksum computation
+- UDP server working with concurrent clients.
 
-ii. Limitations of UDP Checksum computation
+## Learning Resources
 
-iii. UDP server working with concurrent clients.
+### RFCs
 
-🡨end of Lab-CN-Wk07-S3🡪
+- RFC 768: User Datagram Protocol
+- RFC 1071: Computing The Internet Checksum

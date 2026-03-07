@@ -20,6 +20,7 @@ Creating the hosts and the routers
 - run the netowk created during lab 4 
     - ` docker compose -f ./util/yml/multi-net4-2R4H.yml up -d`
 
+Access R1: `docker exec -it R1 bash `
 - Capture the tcp communication at R1
   - `tcpdump -i eth0 -s 0 port 3333 -w /tmp/nc-capture.pcap`
 
@@ -34,7 +35,7 @@ The options provide different choices and configuration on using this utility. A
 #### Starting Network Server
 Access HA, open a terminal window and start a network server accepting connections on a port of your choice e.g. port number 3333. Run the following command in the terminal window.
 
-- $ nc -kl 3333
+- `$ nc -kl 3333`
 
 The option -k specifies that network server will continue to run when an earlier client terminates i.e., closes the connection. The netcat server accepts only one connection at a time and does not handle multiple concurrent connections from many clients.
 
@@ -43,7 +44,7 @@ The option -k specifies that network server will continue to run when an earlier
 Access HB, open a terminal window and connect to this netcat server, which is HA. 
 
 - The client needs to specify the IP address and port number of the server. Assuming that IP address of HA is `172.21.45.5`, run the following command in the terminal window.
-- nc 172.21.45.5 3333
+- `$ nc 172.21.45.5 3333`
 
 This will establish the connection with netcat server. Now enter any text in client terminal and this will appear in server terminal window. Similarly, whatever you enter(type) in the server window will appear in client terminal window.
 
@@ -67,7 +68,7 @@ The network communication exercise in above section shows the data transmission 
 Starting UDP Server
 - First kill the server on HA, Ctrl + C
 - Then run net cat on udp  
-  - $ nc -u -l 3333
+  - `$ nc -u -l 3333`
 
 #### Communication using UDP Client
 

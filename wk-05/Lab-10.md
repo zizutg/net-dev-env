@@ -18,7 +18,7 @@ Currently, most computers use either ARM based CPU (such as Apple Macbook using 
 ***For all of the exercise we will do based on a docker environment we will use pre-built images. When the image does not work. Build the image using the docker file in util folder. as follows:***
 
 - docker build -f `<file-path>/<file-name>.df` -t `<image name>` .
-  - E.g. `docker build -f ./util/df/net-ub22-host.df -t net-ub22-host .
+  - E.g. `docker build -f ./util/df/net-ub22-host.df -t net-ub22-host .`
   
 ## Description
 

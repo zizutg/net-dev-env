@@ -20,6 +20,7 @@ services:
   Router1:
     image: zizutg/multi-router
     container_name: R1
+    hostname: R1
     privileged: true
     tty: true
     sysctls:
@@ -42,6 +43,7 @@ services:
   Router2:
     image: zizutg/multi-router
     container_name: R2
+    hostname: R2
     privileged: true
     tty: true
     sysctls:
@@ -64,6 +66,7 @@ services:
   Host1:
     image: zizutg/net-ub22-host
     container_name: HA
+    hostname: HA
     privileged: true
     tty: true
     cap_add:
@@ -82,6 +85,7 @@ services:
   Host3:
     image: zizutg/net-ub22-host
     container_name: HC
+    hostname: HC
     privileged: true
     tty: true
     cap_add:
@@ -100,6 +104,7 @@ services:
   Host2:
     image: zizutg/net-ub22-host
     container_name: HB
+    hostname: HB
     privileged: true
     ports:
       - "80:80"
@@ -121,6 +126,7 @@ services:
   Host4:
     image: zizutg/net-ub22-host
     container_name: HD
+    hostname: HD
     privileged: true
     tty: true
     cap_add:

@@ -34,6 +34,10 @@ Currently, most computers use either ARM based CPU (such as Apple Macbook using 
   - In the terminal window of your laptop, enter the following command
   - `$ docker exec -it web apache2ctl start`
 
+- Ignore the output:
+- `AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.17.0.3. Set the 'ServerName' directive globally to suppress this message`
+
+
 Verify that web server is up and running and serving web pages. 
 - Run the following command on host (laptop) terminal.
   - `$ curl http://localhost/welcome.html`
@@ -87,9 +91,12 @@ Using HTTP 0.9 version
     <html>
     ```
 
-- On Windows laptop, open the terminal and use the ncat (from nmap family) to access the local web server. With ncat, use the option `-C `(uppercase C) and it should show the similar response. The command on windows terminal should be as follows
+- On Windows laptop, open the terminal and use the ncat (from nmap family) to access the local web server. 
+  - With ncat, use the option `-C `(uppercase C) and it should show the similar response. 
+  - The command on windows terminal should be as follows
+  - On your local computer not inside the local machine
 
-  - `C> ncat -C localhost 80`
+  - `ncat -C localhost 80`
   - `GET /welcome.html`
   
 This indicates the working of Apache Web server with HTTP 0.9 protocol.
@@ -184,7 +191,8 @@ To study this header, we will create two different websites in our local web ser
 - Creating contents for two different websites
   - A single web server serving multiple websites. Explore the role of header "Host: ".
   - Login into the docker instance, configure Apache web server to server multiple websites. A simple set of commands to configure it are as follows
-  - Create the contents for two websites: you must access `net-ub22-host`
+  - Create the contents for two websites: you must access `web`
+  - `$ docker exec -it web bash`
     - $ cd /var/www
     - $ mkdir websitea
     - $ mkdir websiteb
@@ -224,9 +232,7 @@ Configure these two virtual host config files (websitea.conf and websiteb.conf) 
 - Restart apache webserver
   - `$ apache2ctl restart`
 
-Ignore the output:
-- `AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.17.0.3. Set the 'ServerName' directive globally to suppress this message`
-- 
+
 #### Resolving DNS names for two websites
 
 Make entry in `hosts` file, **which you can open with vscode**, to resolve hostname to IP address. On the local machine terminal 

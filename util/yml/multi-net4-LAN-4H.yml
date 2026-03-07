@@ -8,6 +8,7 @@ services:
   H1:
     image: zizutg/net-ub22-host
     container_name: H1
+    hostname: H1
     privileged: true
     tty: true
     networks:
@@ -18,6 +19,7 @@ services:
   H2:
     image: zizutg/net-ub22-host
     container_name: H2
+    hostname: H2
     privileged: true
     tty: true
     networks:
@@ -28,6 +30,7 @@ services:
   H3:
     image: zizutg/net-ub22-host
     container_name: H3
+    hostname: H3
     privileged: true
     tty: true
     networks:
@@ -38,6 +41,7 @@ services:
   H4:
     image: zizutg/net-ub22-host
     container_name: H4
+    hostname: H4
     privileged: true
     tty: true
     networks:

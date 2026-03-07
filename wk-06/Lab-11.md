@@ -17,18 +17,10 @@ access.
 
 ## Environment
 
-Docker Desktop, which is an application environment for your laptop
-environment that enables
+Docker Desktop, which is an application environment for your laptop environment that enables running of containerized applications. The Docker Desktop integrates and
+provides access to a vast ecosystem of docker images via Docker Hub.
 
-running of containerized applications. The Docker Desktop integrates and
-provides access to a
-
-vast ecosystem of docker images via Docker Hub.
-
-To access web content, use of Firefox browser is recommended as it
-provides easier support to
-
-dissect and analyse web request and response.
+To access web content, use of Firefox browser is recommended as it provides easier support to dissect and analyse web request and response.
 
 ## Description
 
@@ -126,7 +118,11 @@ Directives such as ServerName, DocumentRoot and SSL Certificates.
 
 Generate a TLS Key and Certificate with some basic configuration. Key is the private key that should be kept with web server where and certificate is used by web client or browser to verify website details.
 
-Login to the docker container and issue the following command to create the certificate. This certificate is created for a validity period of 1 year (365 days). You can choose your own validity period and certificate filename. This will ask some information such as country, state, city, organization etc and provide the required details. Important point to keep in mind is the provide the website name (e.g. myweb.internal) when entering common name. This is the name that will be used in the website certificate
+Login to the docker container and issue the following command to create the certificate. 
+- This certificate is created for a validity period of 1 year (365 days). You can choose your own validity period and certificate filename. 
+- This will ask some information such as country, state, city, organization etc and provide the required details. 
+- Important point to keep in mind is the provide the website name (e.g. myweb.internal) when entering common name. 
+- This is the name that will be used in the website certificate
 ```
 openssl req -x509 -nodes -days 365 \
   -newkey rsa:2048 \
@@ -168,17 +164,14 @@ Open the browser (Firefox) and enter URL <https://myweb.internal>.
 In the browser URL field, it will show a lock icon. 
 - Click on the lock icon to see the certificate details.
 
-You can access the same by using curl (with option -k) so that it can
-ignore the self signed certificate warning and display the webpage.
+You can access the same by using curl (with option -k) so that it can ignore the self signed certificate warning and display the webpage.
 - `$ curl -k <https://myweb.internal>`
 
 #### Redirect HTTP Traffic to HTTPS
 
-We would like to serve this website using HTTPS traffic only even if use
-enters HTTP. This requires configuring Apache to redirect all HTTP
-traffic to HTTPS using status code 301/302. For that update the
-configuration file myweb.conf with following additional details and
-restart Apache.
+We would like to serve this website using HTTPS traffic only even if use enters HTTP. 
+- This requires configuring Apache to redirect all HTTP traffic to HTTPS using status code 301/302. 
+- For that update the configuration file myweb.conf with following additional details and restart Apache.
 
 
 `root@e24813c78c83:/# nano /etc/apache2/sites-available/myweb.conf`
@@ -288,9 +281,8 @@ AH00558: apache2: Could not reliably determine the server's fully qualified doma
 
 #### Exploring KeepAlive
 
-Open Chrome or Firefox browser with Web Developer tool and access the web page
-<http://localhost/welcome.html> or any other web page. In the Response
-headers, study the value of Response Header "KeepAlive:" 
+Open Chrome or Firefox browser with Web Developer tool and access the web page <http://localhost/welcome.html> or any other web page. 
+- In the Response headers, study the value of Response Header "KeepAlive:" 
 
 <img src="images/web-1.png">
 
@@ -429,7 +421,9 @@ In general, any e-commerce or business serving site makes use of cgi-bin interfa
 - The user is expected to provide fill data in some form, which is processed by the website and based on user's data, website generates the appropriate response. 
   - For example, any bank website authenticates the user (after user enters username/password in a form) and then shows the bank account details etc.
 
-Given below are simple python scripts which takes username and generates a web page welcoming the use. Create these scripts in docker container and access these to explore in details working of the form and cgi interface. Ensure that both the python scripts have execute permission.
+Given below are simple python scripts which takes username and generates a web page welcoming the use. 
+- Create these scripts in docker container and access these to explore in details working of the form and cgi interface. 
+- Ensure that both the python scripts have execute permission.
 
 ### Simple form
 

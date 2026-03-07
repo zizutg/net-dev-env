@@ -82,16 +82,19 @@ Wireshark Preferences (or settings) Appearance Columns and select only those col
 
 ### Setting up wireshark for DNS
 
-Start wireshark on your laptop , select the appropriate active network interface (e.g., WiFi), specify the capture filter as `port 53` and start the capture. A DNS traffic originated from the laptop and corresponding response will be captured and displayed in the wireshark panels.
+Start wireshark on your laptop , select the appropriate active network interface (e.g., WiFi), specify the capture filter as `port 53` and start the capture. 
+- A DNS traffic originated from the laptop and corresponding response will be captured and displayed in the wireshark panels.
 
 #### Simple name resolution
-
-Open the terminal, and choose any domain name of your interest, e.g., my.umbc.edu and use the built in utility nslookup to find the IP address of the domain name. 
-- An example usage of the command is provided on both Windows and Macbook. As shown, this provides two IP addresses `52.20.27.249` and `18.210.162.151` corresponding to the domain name `my.umbc.edu` which is an alias of name `my.aws.umbc.edu`. The command output also shows the default DNS IPv6 address of Server used by the host system. 
+Choose any domain name of your interest, e.g., my.umbc.edu and use the built in utility nslookup to find the IP address of the domain name. 
+- Open the vscode integrated terminal terminal
+- An example usage of the command is provided on both Windows and Macbook. 
+  - As shown, this provides two IP addresses `52.20.27.249` and `18.210.162.151` corresponding to the domain name `my.umbc.edu` which is an alias of name `my.aws.umbc.edu`. 
+  - The command output also shows the default DNS IPv6 address of Server used by the host system. 
 - This may have a little difference depending on your OS and the network you are connected with
 
 ```
-(base) zee@Mac class-repo % nslookup my.umbc.edu
+$ nslookup my.umbc.edu
 Server:         2600:4040:b44e:f400::1
 Address:        2600:4040:b44e:f400::1#53
 
@@ -123,10 +126,13 @@ Some of the public DNS servers that can be used are shown here:
 | Quad9                | 9.9.9.9             | 149.112.112.112|
 | OpenDNS (Cisco)      | 208.67.222.222      | 208.67.220.220|
 
-Find the IP address of any website/domain name using the specific DNS server. An example usage of DNS Resolution using CloudRare (1.1.1.1 and 1.0.0.1) is shown  the  below. Use your preferred domain names and preferred public DNS servers to resolve names and find corresponding IP addresses.
+Find the IP address of any website/domain name using the specific DNS server. 
+- An example usage of DNS Resolution using CloudRare (1.1.1.1 and 1.0.0.1) is shown  the  below. 
+- Use your preferred domain names and preferred public DNS servers to resolve names and find corresponding IP addresses.
+  - This is done on your local machine terminal
 
 ```
-(base) zee@Mac class-repo % nslookup my.umbc.edu 1.1.1.1
+% nslookup my.umbc.edu 1.1.1.1
 Server:         1.1.1.1
 Address:        1.1.1.1#53
 
