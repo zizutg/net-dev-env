@@ -34,7 +34,7 @@ From HA, ping HB and it should be successful.
 
 - `docker exec -it HA ping -c2 172.21.47.5`
 
-### TCP Connection Close
+## TCP Connection Close
 
 A TCP connection goes through following 3 phases:
 
@@ -272,7 +272,7 @@ Prepare to take down the server with the next command and bring it up few second
 
 #### TCP Server
 
-First start the tcp server on HB with buffer size of 12 and delay interval of 1 and wait
+First start the tcp server on HB with buffer size of 12 and delay interval of 4 and wait
 - `root@HB:/# python3 Programs/tcp_server.py -p 9999 -b 12 -d 4`
 ```
 ('172.21.45.5', 46290) 00:42:35.278 AAAAA

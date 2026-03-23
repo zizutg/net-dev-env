@@ -36,7 +36,7 @@ From HA, ping HB and it should be successful.
 
 - `docker exec -it HA ping -c2 172.21.47.5`
 
-### TCP Connection Setup
+## TCP Connection Setup
 
 #### Starting a TCP Server
 
@@ -132,9 +132,9 @@ After the webpages are displayed in HA terminal windows, terminate the packet ca
 Download the packet capture file from docker to the laptop as below. This is done via local computer terminal.
 - `docker cp HB:/tcpdump.pcap wk-08`
 
-Open this packet capture file in wireshark on the laptop. A sample of
-such capture is shown below.
-<img src="images/handshake.png">
+Open this packet capture file in wireshark on the laptop. A sample of such capture is shown below.
+
+<img src="images/tcp-0.png">
 
 The different connections are highlighted in 3 rectangles, each having same source IP, same destination IP, same destination port (`80`), but each with different source port number (eg. `57922`, `57934` and `39344`).
 - When the server receives any data from the client, it knows the socket quartet (src IP, src Port, Dst IP, Dst Port) and accordingly delivers the data to correct thread/child on server process. 
