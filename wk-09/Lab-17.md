@@ -231,6 +231,8 @@ While this is running
   - Access HB on another terminal and list the status of socket status 
     - `root@HB:/# date "+%H:%M:%S: "; netstat -nat | grep tcp`
 
+> ***NOTE: You will see ESTABLISHED after connecting HB from HA using nc, which is the next command***
+
 ```
 root@HB:/# date "+%H:%M:%S: "; netstat -nat | grep tcp
 15:45:23: 

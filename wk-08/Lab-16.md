@@ -66,7 +66,7 @@ After the client (HA) gets the full HTTP response, it initiates closure of TCP C
 - In pkt #10, the client (browser) acks this FIN from server and this closed the TCP connection on both side. 
   - The ack value in pkt #10is 1 more than Sequence number in pkt #9.
 
-#### Two Half-Close in a TCP Connection
+## Two Half-Close in a TCP Connection
 
 In some specific cases, when the application has no more data to send, can close its side of connection but keeps it open to receive the data from the other side. 
 - This is done to conserve the resource on device. 
@@ -123,7 +123,7 @@ Examine the programs in Programs dir using cat
 
 Modify these programs (using `nano`) to change the amount of data sent by server or explore some internet sites where client closes the connection whereas server continues to send data to understand these two half closings of TCP connection.
 
-### MSL Timeout implementation
+## MSL Timeout implementation
 
 A TCP process who initiates connection close, when receives FIN from the other side goes into wait state, which waits for 2\*MSL=120 seconds before finally closing the connection. 
 - If during this 2\*MSL time window, a program try start using the same port number which was used in previous connection, results in error "Address already in use". 
@@ -183,7 +183,7 @@ On host HB docker instance, start TCP server program listening on port 9999 (opt
 
 > #### TCP Client Program
 
-On host a HA, and start TCP client program that send 3 packets (option -c) to UDP server with buffer size of 10 (option -b) and delay interval of 3s (option -d) as shown below.
+On host a HA, and start TCP client program that send 3 packets (option -c) to TCP server with buffer size of 10 (option -b) and delay interval of 3s (option -d) as shown below.
 - `root@HA:/# python3 Programs/tcp_client.py -s 172.21.47.5 -p 9999 -c 3 -d 3 -b 10`
 
 This will send data on TCP server, as shown below
