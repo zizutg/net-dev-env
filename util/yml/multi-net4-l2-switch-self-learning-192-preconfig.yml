@@ -1,0 +1,118 @@
+services:
+  HA:
+    image: zizutg/net-ub22-host
+    container_name: HA
+    hostname: HA
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      link-HA-S1:
+        ipv4_address: 10.10.11.2
+    command: >
+      bash -lc "
+      mkdir -p /tmp;
+      ip link set dev eth0 down || true;
+      ip addr flush dev eth0 || true;
+      ip link set dev eth0 address 02:22:22:22:22:22 || true;
+      ip addr replace 192.168.99.2/24 dev eth0 || true;
+      ip link set dev eth0 up || true;
+      exec tail -f /dev/null
+      "
+
+  HB:
+    image: zizutg/net-ub22-host
+    container_name: HB
+    hostname: HB
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      link-HB-S1:
+        ipv4_address: 10.10.12.2
+    command: >
+      bash -lc "
+      mkdir -p /tmp;
+      ip link set dev eth0 down || true;
+      ip addr flush dev eth0 || true;
+      ip link set dev eth0 address 02:44:44:44:44:44 || true;
+      ip addr replace 192.168.99.4/24 dev eth0 || true;
+      ip link set dev eth0 up || true;
+      exec tail -f /dev/null
+      "
+
+  HC:
+    image: zizutg/net-ub22-host
+    container_name: HC
+    hostname: HC
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      link-HC-S1:
+        ipv4_address: 10.10.13.2
+    command: >
+      bash -lc "
+      mkdir -p /tmp;
+      ip link set dev eth0 down || true;
+      ip addr flush dev eth0 || true;
+      ip link set dev eth0 address 02:55:55:55:55:55 || true;
+      ip addr replace 192.168.99.5/24 dev eth0 || true;
+      ip link set dev eth0 up || true;
+      exec tail -f /dev/null
+      "
+
+  S1:
+    image: zizutg/multi-l2-switch
+    container_name: S1
+    hostname: S1
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      link-HA-S1:
+        ipv4_address: 10.10.11.3
+      link-HB-S1:
+        ipv4_address: 10.10.12.3
+      link-HC-S1:
+        ipv4_address: 10.10.13.3
+    command: >
+      bash -lc "
+      mkdir -p /tmp;
+      ip addr flush dev eth0 || true;
+      ip addr flush dev eth1 || true;
+      ip addr flush dev eth2 || true;
+      if ! ip link show br0 >/dev/null 2>&1; then ip link add name br0 type bridge; fi;
+      ip link set dev br0 type bridge stp_state 0 || true;
+      ip link set dev br0 up || true;
+      ip link set dev eth0 master br0 || true;
+      ip link set dev eth1 master br0 || true;
+      ip link set dev eth2 master br0 || true;
+      ip link set dev eth0 up || true;
+      ip link set dev eth1 up || true;
+      ip link set dev eth2 up || true;
+      exec tail -f /dev/null
+      "
+
+networks:
+  link-HA-S1:
+    name: l2-link-HA-S1-192-preconfig
+    ipam:
+      config:
+        - subnet: 10.10.11.0/29
+
+  link-HB-S1:
+    name: l2-link-HB-S1-192-preconfig
+    ipam:
+      config:
+        - subnet: 10.10.12.0/29
+
+  link-HC-S1:
+    name: l2-link-HC-S1-192-preconfig
+    ipam:
+      config:
+        - subnet: 10.10.13.0/29

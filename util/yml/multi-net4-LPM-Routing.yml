@@ -1,0 +1,274 @@
+networks:
+  net-3_0_29:
+    name: net4-3-0_29
+    ipam:
+      config:
+        - subnet: 172.21.3.0/29
+
+  net-3_8_29:
+    name: net4-3-8_29
+    ipam:
+      config:
+        - subnet: 172.21.3.8/29
+
+  net-3_16_29:
+    name: net4-3-16_29
+    ipam:
+      config:
+        - subnet: 172.21.3.16/29
+
+  net-4_0_24:
+    name: net4-4
+    ipam:
+      config:
+        - subnet: 172.21.4.0/24
+
+  net-5_0_24:
+    name: net4-5
+    ipam:
+      config:
+        - subnet: 172.21.5.0/24
+
+  net-6_0_23:
+    name: net4-6_23
+    ipam:
+      config:
+        - subnet: 172.21.6.0/23
+        
+services:
+  R1:
+    image: zizutg/multi-router
+    container_name: R1
+    hostname: R1
+    tty: true
+    sysctls:
+      net.ipv4.ip_forward: "1"
+      net.ipv4.conf.all.rp_filter: "0"
+      net.ipv4.conf.default.rp_filter: "0"
+#      net.ipv4.conf.eth0.rp_filter: "0"
+#      net.ipv4.conf.eth1.rp_filter: "0"
+#      net.ipv4.conf.eth2.rp_filter: "0"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-3_0_29:
+        ipv4_address: 172.21.3.2
+      net-3_8_29:
+        ipv4_address: 172.21.3.10
+      net-4_0_24:
+        ipv4_address: 172.21.4.2
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add 172.21.5.0/24 via 172.21.3.14
+      && ip route add 172.21.6.0/23 via 172.21.3.6
+      && tail -f /dev/null
+      "
+
+  R2:
+    image: zizutg/multi-router
+    container_name: R2
+    hostname: R2
+    tty: true
+    sysctls:
+      net.ipv4.ip_forward: "1"
+      net.ipv4.conf.all.rp_filter: "0"
+      net.ipv4.conf.default.rp_filter: "0"
+#      net.ipv4.conf.eth0.rp_filter: "0"
+#      net.ipv4.conf.eth1.rp_filter: "0"
+#      net.ipv4.conf.eth2.rp_filter: "0"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-3_8_29:
+        ipv4_address: 172.21.3.14
+      net-3_16_29:
+        ipv4_address: 172.21.3.18
+      net-5_0_24:
+        ipv4_address: 172.21.5.2
+      net-6_0_23:
+        ipv4_address: 172.21.6.99
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add 172.21.4.0/24 via 172.21.3.10
+      && tail -f /dev/null
+      "
+# add the following manually since docker does not permit overlapping networks
+# assuming eth3 is the interface to which an address 172.21.6.99 belongs
+# ip addr flush dev eth3
+# ip addr add 172.21.7.2/26 dev eth3
+# ip link set dev eth3 up
+# ip route add 172.21.5.160/27 via 172.21.3.22
+
+  R3:
+    image: zizutg/multi-router
+    container_name: R3
+    hostname: R3
+    tty: true
+    sysctls:
+      net.ipv4.ip_forward: "1"
+      net.ipv4.conf.all.rp_filter: "0"
+      net.ipv4.conf.default.rp_filter: "0"
+#      net.ipv4.conf.eth0.rp_filter: "0"
+#      net.ipv4.conf.eth1.rp_filter: "0"
+#      net.ipv4.conf.eth2.rp_filter: "0"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-3_0_29:
+        ipv4_address: 172.21.3.6
+      net-3_16_29:
+        ipv4_address: 172.21.3.22
+      net-6_0_23:
+        ipv4_address: 172.21.6.2
+      net-5_0_24:
+        ipv4_address: 172.21.5.99
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add 172.21.4.0/24 via 172.21.3.2
+      && tail -f /dev/null
+      "
+# use the network interface corresponding to IP 172.21.5.99/24
+# assuming eth2 is the interface to which this address belongs
+# ip addr flush dev eth2
+# ip addr add 172.21.5.190/27 dev eth2
+# ip link set dev eth2 up
+# ip route add 172.21.7.0/26 via 172.21.3.18
+
+  HA:
+    image: zizutg/net-ub22-host
+    container_name: HA
+    hostname: HA
+    tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-4_0_24:
+        ipv4_address: 172.21.4.5
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.4.2
+      && tail -f /dev/null
+      "
+
+  HB:
+    image: zizutg/net-ub22-host
+    container_name: HB
+    hostname: HB
+    tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-5_0_24:
+        ipv4_address: 172.21.5.5
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.5.2
+      && tail -f /dev/null
+      "
+
+  HC:
+    image: zizutg/net-ub22-host
+    container_name: HC
+    hostname: HC
+    tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-6_0_23:
+        ipv4_address: 172.21.6.5
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.6.2
+      && tail -f /dev/null
+      "
+# below route is needed to reach smaller overlapping subnet
+# ip route add 172.21.7.0/26 via 172.21.6.2
+
+  HD:
+    image: zizutg/net-ub22-host
+    container_name: HD
+    hostname: HD
+    tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-5_0_24:
+        ipv4_address: 172.21.5.199
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.5.99
+      && tail -f /dev/null
+      "
+# add the following manually since docker does not permit overlapping networks
+# assuming eth0 is the interface to which an address 172.21.5.199 belongs
+# ip addr flush dev eth0
+# ip addr add 172.21.5.161/27 dev eth0
+# ip link set dev eth0 up
+# ip route add default via 172.21.5.190
+
+  HE:
+    image: zizutg/net-ub22-host
+    container_name: HE
+    hostname: HE
+    tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-6_0_23:
+        ipv4_address: 172.21.6.199
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.6.99
+      && tail -f /dev/null
+      "
+# add the following manually since docker does not permit overlapping networks
+# assuming eth0 is the interface to which an address 172.21.6.199 belongs
+# ip addr flush dev eth0
+# ip addr add 172.21.7.5/26 dev eth0
+# ip link set dev eth0 up
+# ip route add default via 172.21.7.2
+
+  HF:
+    image: zizutg/net-ub22-host
+    container_name: HF
+    hostname: HF
+    tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-6_0_23:
+        ipv4_address: 172.21.7.66
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.6.2
+      && tail -f /dev/null
+      "
+# below route is needed to reach smaller overlapping subnet
+# ip route add 172.21.7.0/26 via 172.21.6.2

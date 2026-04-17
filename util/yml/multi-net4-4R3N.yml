@@ -1,0 +1,265 @@
+networks:
+  net-A_26:
+    name: net4-A_26
+    ipam:
+      config:
+        - subnet: 172.21.21.128/26
+
+  net-B_25:
+    name: net4-B_25
+    ipam:
+      config:
+        - subnet: 172.21.21.0/25
+
+  net-C_24:
+    name: net4-C_24
+    ipam:
+      config:
+        - subnet: 172.21.20.0/24
+
+  net-R1R2_29:
+    name: net4-R1R2_29
+    ipam:
+      config:
+        - subnet: 172.21.21.192/29
+
+  net-R1R3_29:
+    name: net4-R1R3_29
+    ipam:
+      config:
+        - subnet: 172.21.21.200/29
+
+  net-R1R4_29:
+    name: net4-R1R4_29
+    ipam:
+      config:
+        - subnet: 172.21.21.208/29
+
+services:
+  R1:
+    image: zizutg/multi-router
+    container_name: R1
+    hostname: R1
+    privileged: true
+    tty: true
+    sysctls:
+      net.ipv4.ip_forward: "1"
+      net.ipv4.conf.all.rp_filter: "0"
+      net.ipv4.conf.default.rp_filter: "0"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-R1R2_29:
+        ipv4_address: 172.21.21.194
+      net-R1R3_29:
+        ipv4_address: 172.21.21.202
+      net-R1R4_29:
+        ipv4_address: 172.21.21.210
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add 172.21.21.128/26 via 172.21.21.198
+      && ip route add 172.21.21.0/25 via 172.21.21.206
+      && ip route add 172.21.20.0/24 via 172.21.21.214
+      && tail -f /dev/null
+      "
+
+  R2:
+    image: zizutg/multi-router
+    container_name: R2
+    hostname: R2
+    privileged: true
+    tty: true
+    sysctls:
+      net.ipv4.ip_forward: "1"
+      net.ipv4.conf.all.rp_filter: "0"
+      net.ipv4.conf.default.rp_filter: "0"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-A_26:
+        ipv4_address: 172.21.21.130
+      net-R1R2_29:
+        ipv4_address: 172.21.21.198
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.21.194
+      && tail -f /dev/null
+      "
+
+  R3:
+    image: zizutg/multi-router
+    container_name: R3
+    hostname: R3
+    privileged: true
+    tty: true
+    sysctls:
+      net.ipv4.ip_forward: "1"
+      net.ipv4.conf.all.rp_filter: "0"
+      net.ipv4.conf.default.rp_filter: "0"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-B_25:
+        ipv4_address: 172.21.21.2
+      net-R1R3_29:
+        ipv4_address: 172.21.21.206
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.21.202
+      && tail -f /dev/null
+      "
+
+  R4:
+    image: zizutg/multi-router
+    container_name: R4
+    hostname: R4
+    privileged: true
+    tty: true
+    sysctls:
+      net.ipv4.ip_forward: "1"
+      net.ipv4.conf.all.rp_filter: "0"
+      net.ipv4.conf.default.rp_filter: "0"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-C_24:
+        ipv4_address: 172.21.20.2
+      net-R1R4_29:
+        ipv4_address: 172.21.21.214
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.21.210
+      && tail -f /dev/null
+      "
+
+  HA1:
+    image: zizutg/net-ub22-host
+    container_name: HA1
+    hostname: HA1
+    privileged: true
+    tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-A_26:
+        ipv4_address: 172.21.21.131
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.21.130
+      && tail -f /dev/null
+      "
+
+  HA2:
+    image: zizutg/net-ub22-host
+    container_name: HA2
+    hostname: HA2
+    privileged: true
+    tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-A_26:
+        ipv4_address: 172.21.21.190
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.21.130
+      && tail -f /dev/null
+      "
+
+  HB1:
+    image: zizutg/net-ub22-host
+    container_name: HB1
+    hostname: HB1
+    privileged: true
+    tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-B_25:
+        ipv4_address: 172.21.21.3
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.21.2
+      && tail -f /dev/null
+      "
+
+  HB2:
+    image: zizutg/net-ub22-host
+    container_name: HB2
+    hostname: HB2
+    privileged: true
+    tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-B_25:
+        ipv4_address: 172.21.21.126
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.21.2
+      && tail -f /dev/null
+      "
+
+  HC1:
+    image: zizutg/net-ub22-host
+    container_name: HC1
+    hostname: HC1
+    privileged: true
+    tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-C_24:
+        ipv4_address: 172.21.20.3
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.20.2
+      && tail -f /dev/null
+      "
+
+  HC2:
+    image: zizutg/net-ub22-host
+    container_name: HC2
+    hostname: HC2
+    privileged: true
+    tty: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net-C_24:
+        ipv4_address: 172.21.20.254
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.20.2
+      && tail -f /dev/null
+      "

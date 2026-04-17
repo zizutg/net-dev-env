@@ -215,15 +215,11 @@ On win1, have HB run the nc server and win2 have HA run nc client.
 - Now on Server program, enter Ctrl-C and check the network socket status on HB.
   - `root@HB:/# netstat -nat`
 ```
-Chain INPUT (policy ACCEPT 0 packets, 0 bytes)
- pkts bytes target     prot opt in     out     source               destination         
+Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State      
+tcp        0      0 127.0.0.11:33569        0.0.0.0:*               LISTEN     
+tcp        0      0 172.21.47.5:2222        172.21.45.5:51670       FIN_WAIT2  
 
-Chain FORWARD (policy ACCEPT 263 packets, 14326 bytes)
- pkts bytes target     prot opt in     out     source               destination         
-    7   364 DROP       6    --  *      *       172.21.47.5          172.21.45.5          tcp flags:0x11/0x11
-
-Chain OUTPUT (policy ACCEPT 0 packets, 0 bytes)
- pkts bytes target     prot opt in     out     source               destination        
 ```
 
 Also, observe the packet drop status at R2.

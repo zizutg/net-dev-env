@@ -1,0 +1,19 @@
+# Dockerfile for a lightweight Layer 2 software switch image
+# intended for Lab 23 self-learning, flooding, and broadcast analysis.
+
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      iproute2 \
+      iputils-ping \
+      tcpdump \
+      net-tools \
+      bridge-utils \
+      procps \
+      ethtool && \
+    rm -rf /var/lib/apt/lists/*
+
+CMD ["bash", "-lc", "mkdir -p /tmp && tail -f /dev/null"]

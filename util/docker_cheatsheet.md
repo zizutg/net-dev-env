@@ -14,7 +14,7 @@
 | Create and run a container from an image with a custom name              | `docker run --name <container_name> <image_name>`                       |
 | Run a container and publish its port(s) to the host                      | `docker run -p <host_port>:<container_port> <image_name>`               |
 | Run a container in the background (detached mode)                        | `docker run -d <image_name>`                                            |
-| Start or stop an existing container                                      | `docker start|stop <container_name>`                                    |
+| Start or stop an existing container                                      | `docker start\|stop <container_name>`                                    |
 | Remove a stopped container                                               | `docker rm <container_name>`                                            |
 | Open a shell inside a running container                                  | `docker exec -it <container_name> sh`                                   |
 | Fetch and follow logs of a container                                     | `docker logs -f <container_name>`                                       |
@@ -22,6 +22,16 @@
 | List currently running containers                                        | `docker ps`                                                             |
 | List all containers (running and stopped)                                | `docker ps --all`                                                       |
 | View resource usage statistics                                           | `docker container stats`                                                |
+| Start services defined in a Compose file                                 | `docker compose up`                                                     |
+| Start services from a specific Compose file in detached mode             | `docker compose -f <compose_file>.yml up -d`                            |
+| Stop and remove services, networks, and default resources                | `docker compose down`                                                   |
+| Stop and remove services from a specific Compose file                    | `docker compose -f <compose_file>.yml down --remove-orphans`                             |
+| Validate and render the effective Compose configuration                  | `docker compose -f <compose_file>.yml config`                           |
+| List services in a Compose project                                       | `docker compose ps`                                                     |
+| Restart a specific service in a Compose project                          | `docker compose restart <service_name>`                                 |
+| View logs for all services in a Compose project                          | `docker compose logs`                                                   |
+| Follow logs for a specific service in a Compose project                  | `docker compose logs -f <service_name>`                                 |
+| Run a one-off command in a Compose service                               | `docker compose exec <service_name> <command>`                          |
 | Start the Docker daemon                                                  | `docker -d`                                                             |
 | Get help with Docker or any subcommand                                   | `docker --help`                                                         |
 | Display system-wide information                                          | `docker info`                                                           |
