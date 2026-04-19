@@ -21,7 +21,7 @@ To capture real life packets use wireshark.
 
 ## Description
 
-> #### Creating Simple Network
+#### Creating Simple Network
 
 
 Create a simple network of four hosts connected via two routers.
