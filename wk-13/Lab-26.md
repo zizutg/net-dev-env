@@ -1,309 +1,501 @@
-SSH based VPNs
+# Lab 26 - Firewall, SSH-VPN, and Loadbalancing
 
-# Overview
+This exercise provides hands-on experienceexplores how a Linux firewall/router can control traffic between an external user network, a DMZ, and an internal corporate network using `iptables`. 
+- It demonstrates firewall policy enforcement, including which services are allowed or blocked between the Internet, DMZ servers, and internal servers. 
+- The lab also introduces SSH tunneling as a way to bypass firewall restrictions by carrying blocked services through permitted SSH connections. 
+- Finally, it shows how `iptables` NAT rules can be used to distribute web traffic across multiple internal servers for load balancing.
 
-This exercise provides basic understanding of using ssh based VPN across
-firewall to access services which are protected by firewall.
-Essentially, the focus of this exercise to explore and understand
-firewall evasion or bypass techniques.
+## Learning Objectives
 
-# Learning Objectives
+- Understand basics of Firewalls
+- Understand working of Linux firewalls(iptables)
+- Understand working of VPN via SSh
+- Understand setting up SSH Ingress Egress port forwarding
+- Understand HTTP Based Load Balancing
+- Understand TCP Based Load Balancing
 
-- Understand ?
+## Environment 
 
-# Learning Resources
+Docker Desktop, which is an application environment for your laptop environment that enables running of containerized applications. 
+- The Docker Desktop integrates and provides access to a vast ecosystem of docker images via Docker Hub.
 
-1.  Hands on network security
-
-    - <https://www.handsonsecurity.net/resources.html>
-
-2.  [Iptables tutorial]{.underline}
-
-    - [https://www.frozentux.net/iptables-tutorial/iptables-tutorial.html]{.underline}
-
-# Environment 
-
-Docker Desktop, which is an application environment for your laptop
-environment that enables
-
-running of containerized applications. The Docker Desktop integrates and
-provides access to a
-
-vast ecosystem of docker images via Docker Hub.
-
-# Description
 
 ## Network Topology
 
-![Figure 1: Network Topology to Study Firewall
-Evasion](media/image1.png){width="5.802728565179352in"
-height="1.6707633420822396in"}
+<img src="images/fw-ev.png" >
 
-This network setup is used for understand ssh based VPN mechanism which
-can be used to access services which are prevented by firewall. The
-network consists of a DMZ network, consisting of two hosts, and
-connected by a router to internet and accessed directly by users on the
-internet, and a corporate LAN which is protected by firewall.
+This network setup is used for demonstrating basic functionality of firewall. 
+- The network consists of a DMZ network connected by a router to internet and accessed directly by users on the internet, and a corporate LAN which is protected by firewalls.
 
-### Check Connectivity
+Create the docker network using the following command:
+- `docker compose -f util/yml/multi-Firewall-Functionality.yml up -d`
+    ```
+    [+] up 11/11
+    ✔ Network yml_net4-net  Created                                0.0s
+    ✔ Network yml_net4-Corp Created                                0.0s
+    ✔ Network yml_net4-DMZ  Created                                0.0s
+    ✔ Container DS2         Started                                0.3s
+    ✔ Container DS1         Started                                0.3s
+    ✔ Container GW          Started                                0.3s
+    ✔ Container S3          Started                                0.3s
+    ✔ Container S1          Started                                0.3s
+    ✔ Container FW          Started                                0.3s
+    ✔ Container S2          Started                                0.3s
+    ✔ Container User        Started        
+    ```
 
-Verify that User (172.21.4.5) can reach DS1(172.21.2.2), DS2(172.21.2.3)
-as well as S1(192.68.3.5), S2(192.168.3.6) and S3(192.168.3.7) i.e.,
-ping from User to all these servers should be successful.
+To stop it use:
+- `docker compose -f util/yml/multi-Firewall-Functionality.yml down --remove-orphans`
 
-## Configuring Firewall
+#### Check Connectivity
 
-Implement the firewall rules to comply with the following corporate
-security policy requirements. Essentially, implement all iptables rules
-as done in the earlier exercises.
+Verify, via ping, the initial connectivity allowed by the current topology and routing configuration.
 
-### Firewall Policies
+- `User` (`172.21.4.5`) should be able to reach `DS1` (`172.21.2.2`) and `DS2` (`172.21.2.3`).
+- Access from `User` to the internal servers `S1` (`192.168.3.5`), `S2` (`192.168.3.6`), and `S3` (`192.168.3.7`) should only succeed if the current firewall policy allows it.
 
-Here we will define simple firewall requirement. The default approach of
-firewall is to Deny all traffic unless specifically permitted. To
-understand firewall functionality, define the following policy
-requirements.
+## Firewall Functionality
 
-i.  Permit user to access any traffic on DMZ network i.e., user should
-    be able to access any service (all ports) on server DS1.
+#### Firewall Policies
 
-ii. Permit DMZ network to access web services (port 80) on Corporate
-    network
+Here we will define simple firewall requirement. 
+- The default approach of firewall is to Deny all traffic unless specifically permitted. 
+- To understand firewall functionality, define the following policy requirements.
+    - Permit user to access any traffic on DMZ network 
+      - i.e., user should be able to access any service (all ports) on server DS1.
+    - Permit DMZ network to access web services (port 80) on Corporate network
+    - Permit DMZ network to access any services on Internet.
+    - Corporate servers should be able to access any service on DMZ network.
+    - All other traffic should be blocked, e.g.,
+        - User can't access corporate servers (S1, S2, and S3)
+        - Corporate network can't access User on the Internet
 
-iii. Permit DMZ network to access any services on Internet.
+#### Implementing Firewall Rules
 
-iv. Corporate servers should be able to access any service on DMZ
+As there is no restriction between user (internet) and DMZ network, router R1 simply works as regular router and no firewall rules are implemented on R1. 
+- All the firewall policies are to be implemented on firewall router (FW).
+
+
+- Access FW and verify the interface names with their respective address, e.g., eth0 interface should have IP address 192.168.3.254 and eth1 interface should have IP address 172.21.2.254. 
+  - `root@FW:/# ip -4 -br addr`
+    ```
+    lo               UNKNOWN        127.0.0.1/8 
+    eth0@if21        UP             192.168.3.254/24 
+    eth1@if28        UP             172.21.2.254/24 
+    ```
+- If it is other way around, interchange the interface names accordingly in the below commands.
+
+As per the firewall policy requirement, run following firewall commands.
+
+- Set the default policy to DROP
+  - `root@FW:/# iptables -P FORWARD DROP`
+- Permit DMZ network to access web services on Corporate network
+  - `root@FW:/# iptables -I FORWARD -i eth1 -p tcp -s 172.21.2.0/24 -d 192.168.3.0/24 --dport 80 -j ACCEPT`
+- Permit corporate servers to access any service on DMZ
+  - `root@FW:/# iptables -I FORWARD -i eth0 -p tcp -s 192.168.3.0/24 -d 172.21.2.0/24 -j ACCEPT`
+- Permit return TCP traffic (established sessions) from DMZ network to
+    corporate servers.
+  - `root@FW:/# iptables -I FORWARD -p tcp -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT`
+
+
+#### Starting Services on DMZ network and Corporate servers.
+
+Access the DMZ server DS1, start Apache and a netcat server on port 9999
+- `root@DS1:/# apache2ctl start` > As usual ignore the error
+- `root@DS1:/# nc -l 9999`   
+    
+Access the corporate server S1, start Apache web server
+- `root@S1:/# apache2ctl start`
+
+Access corporate server S2, start netcat server on port 3333
+- `root@S2:/# nc -l 3333`
+
+### Checking Firewall Rules
+
+#### User should not be able to reach any servers in corporate network
+On the terminal you are accessing `User` machine and all of following access to corporate network should fail
+Web Access to server S1.
+- `root@User:/# curl -v -m 5 http://192.168.3.5/welcome.html`
+```
+*   Trying 192.168.3.5:80...
+* Connection timed out after 5006 milliseconds
+* Closing connection
+curl: (28) Connection timed out after 5006 milliseconds
+```
+
+Access to netcat server on S2
+- `root@User:/# nc -v -w 5 192.168.3.6 3333`
+```
+nc: connect to 192.168.3.6 port 3333 (tcp) timed out: Operation now in progress
+```
+
+Ping to server S3.
+- `root@User:/# ping -c2 192.168.3.7`
+```
+PING 192.168.3.7 (192.168.3.7) 56(84) bytes of data.
+
+--- 192.168.3.7 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1028ms
+```
+
+#### User should be able to Access DMS Server.
+
+Access to web server on DS1 should be successful.
+- `root@User:/# curl http://172.21.2.2/welcome.html`
+```html
+<html>
+    <head>
+          <title>Welcome Page</title>
+    </head>
+    <body>
+          <h1>Welcome to HTTP Learning</h1>
+              Welcome to experiential learning of HTTP protocol.
+    </body>
+</html>
+```
+
+#### DMZ server should be able to access Web Services on Corporate network
+
+Access DMZ server DS1 on another terminal, then access the web server on S1 from DS1. This should be successful
+- `root@DS1:/# curl -m 5 http://192.168.3.5/welcome.html`
+
+```html
+<html>
+    <head>
+          <title>Welcome Page</title>
+    </head>
+    <body>
+          <h1>Welcome to HTTP Learning</h1>
+              Welcome to experiential learning of HTTP protocol.
+    </body>
+</html>
+```
+
+#### DMZ server should not be able to access any other services on Corporate Network
+
+Connecting to netcat server on S2 should fail.
+- `root@DS1:/# nc -v -w 5 192.168.3.6 3333`
+```  
+nc: connect to 192.168.3.6 port 3333 (tcp) timed out: Operation now in progress
+```
+
+Check ping reachability to S3 should fail.
+- `root@DS1:/# ping -c2 192.168.3.7`
+```
+PING 192.168.3.7 (192.168.3.7) 56(84) bytes of data.
+
+--- 192.168.3.7 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1030ms
+```
+#### Corporate Access
+
+Access to web server on DS1 from S1 should succeed.
+- `root@S1:/# curl -m 5 http://172.21.2.2/welcome.html`
+
+```html
+<html>
+    <head>
+          <title>Welcome Page</title>
+    </head>
+    <body>
+          <h1>Welcome to HTTP Learning</h1>
+              Welcome to experiential learning of HTTP protocol.
+    </body>
+</html>
+```
+
+Access to netcat server (port 3333) from S1 should succeed.
+- `root@S1:/# nc -v -w 5 172.21.2.2 9999`
+```
+Connection to 172.21.2.2 9999 port [tcp/*] succeeded!
+Hello
+```
+
+Ping to DS1 from S1 should fail.
+- `root@S1:/# ping -c2 172.21.2.2`
+```
+PING 172.21.2.2 (172.21.2.2) 56(84) bytes of data.
+
+--- 172.21.2.2 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1063ms
+```
+
+Ping to User from S1 should fail.
+- `root@S1:/# ping -c2 172.21.4.5`
+
+```
+PING 172.21.4.5 (172.21.4.5) 56(84) bytes of data.
+
+--- 172.21.4.5 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1029ms
+```
+***Kill All the netcat servers running on all hosts***
+
+### Explore Firewalls
+
+To enhance your understanding of firewall functionality, define your own policy and implement the iptables rules for meeting policy requirements and verify the same.
+
+***To clear all firewall rules and check that all reachability is restored among all systems, you can use this command. However, for now do not clear it as the policy is required by the next section.***
+- `root@FW:/# iptables -F`
+
+
+## SSH based VPN 
+
+We will use the same network setup to understand SSH based VPN mechanism which can be used to access services which are prevented by firewall.
+
+### Firewall Evasion
+
+A corporate user would like to access the some services which are blocked by firewall directly.
+- The user can't change firewall configuration and thus need to implement some mechanisms at hosts levels. 
+- The user would like to access following services:
+    - Accessing Netcat Servers on Corporate network from DMZ Networks
+        - Access netcat server on S2 (port 3333) from DS1 and DS2.
+        - Access netcat server on S3 (port 4444) from DS1 and DS2.
+    - Accessing web services on Internet (User) from corporate network.
+        - Access web server on Internet (User) from corporate network
+        - Access netcat server (port 8888) on Internet user from corporate
     network.
+### Implementing Firewall evasion -- Egress Port Forwarding (Reverse Tunnel)
 
-v.  All other traffic should be blocked, e.g.,
+Though DS1 and DS2 can't access ssh (secure shell) to S1, S2 and S3, due to firewall policies, yet the servers S1, S2 and S3 can access any services on DS1 and DS2. 
+- Thus, setup the reverse SSH Port forwarding from S1 to DS1 and DS2.
 
-    a.  User can't access corporate servers (S1, S2, and S3)
+#### Updating sshd_config file on DS1, DS2
 
-    b.  Corporate network can't access User on the Internet
+To enable reverse port forward, modify the file `/etc/ssh/sshd_config` on both DS1 and DS2.
 
-### Implementing Firewall Rules
+Access DS1, edit ssh_config, save and exit
+- `root@DS1:/# nano /etc/ssh/sshd_config`
+  -  Replace the following entry `#GatewayPorts No` with the entry `GatewayPorts clientspecified`
+-  Restart ssh services 
+   -  `root@DS1:/# service ssh restart`
+        ```
+        * Restarting OpenBSD Secure Shell server sshd            [ OK ] 
+        ```
+- ***Access DS2, and do the same***
 
-These policies are implemented by running following commands on
-firewall.
+#### Setting Up SSH Reverse Port Forwarding
 
-**root@FW:/#** iptables -P FORWARD DROP
 
-**root@FW:/#** iptables -I FORWARD -i eth1 -p tcp -s 172.21.2.0/24 -d
-192.168.3.0/24 \--dport 80 -j ACCEPT
+Access `S1` and set up SSH reverse port forwarding so that services on the internal servers can be reached through `DS1` and `DS2`.
+- `root@S1:/# ssh -f -4NT -R 0.0.0.0:33333:192.168.3.6:3333 root@172.21.2.2`
+  - If there is a message as shown below, type `yes`
+```
+The authenticity of host '172.21.2.2 (172.21.2.2)' can't be established.
+ED25519 key fingerprint is SHA256:LZn68jNy8as+QbGgC+93g8IsAnh8ZnELGZHiarRB0Eg.
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '172.21.2.2' (ED25519) to the list of known hosts.
+```
+- `root@S1:/# ssh -f -4NT -R 0.0.0.0:44444:192.168.3.7:4444 root@172.21.2.3`
 
-**root@FW:/#** iptables -I FORWARD -i eth0 -p tcp -s 192.168.3.0/24 -d
-172.21.2.0/24 -j ACCEPT
+These commands create the following reverse port forwards:
+- This means that if a TCP connection reaches `DS1` on port `33333`, it is carried through the SSH tunnel to `S2` on port `3333`. 
+- Similarly, traffic sent to `DS2` on port `44444` is forwarded to `S3` on port `4444`.
 
-**root@FW:/#** iptables -I FORWARD -p tcp -m conntrack \--ctstate
-RELATED,ESTABLISHED -j ACCEPT
+Because the forwarded traffic travels inside an SSH connection that is already allowed, this mechanism can bypass firewall restrictions if such SSH access is permitted.
 
-## Firewall Evasion
+#### Accessing Reverse Proxy.
 
-A corporate user would like to access the some services which are
-blocked by firewall directly.. The user can't change firewall
-configuration and thus need to implement some mechanisms at hosts
-levels. The user would like to access following services.
+Access S2, start netcat ssh server on port 3333 in perpetual mode (option -k)
+- `root@S2:/# nc -kl 3333`
 
-### Accessing Netcat Servers on Corporate network from DMZ Networks
+Similarly, access S3, start netcat server on port 4444 in perpetual mode.
+- `root@S3:/# nc -kl 4444`
 
-a.  Access netcat server on S2 (port 3333) from DS1 and DS2.
-
-b.  Access netcat server on S3 (port 4444) from DS1 and DS2.
-
-### Accessing web services on Internet (User) from corporate network.
-
-a.  Access web server on Internet (User) from corporate network
-
-b.  Access netcat server (port 8888) on Internet user from corporate
-    network.
-
-## Implementing Firewall evasion -- Egress Port Forwarding (Reverse Tunnel)
-
-Though DS1 and DS2 can't access ssh (secure shell) to S1, S2 and S3, due
-to firewall policies, yet the servers S1, S2 and S3 can access any
-services on DS1 and DS2. Thus, setup the reverse SSH Port forwarding
-from S1 to DS1 and DS2.
-
-### Updating sshd_config file on DS1, DS2
-
-To enable reverse port forward, modify the file /etc/ssh/sshd_config on
-both DS1 and DS2 and update the following entry
-
-#GatewayPorts No
-
-With the entry
-
-#GatewayPorts clientspecified
-
-And restart ssh services
-
-**DS1\>** docker exec -it DS1 bash
-
-**root@DS1:/#** nano /etc/ssh/sshd_config
-
-#GatewayPorts no
-
-GatewayPorts clientspecified
-
-**root@DS1:/#** service ssh restart
-
-\* Restarting OpenBSD Secure Shell server sshd \[ OK \]
-
-**root@DS1:/#**
-
-**DS2\>** docker exec -it DS2 bash
-
-**root@DS2:/#** nano /etc/ssh/sshd_config
-
-#GatewayPorts no
-
-GatewayPorts clientspecified
-
-**root@DS2:/#** service ssh restart
-
-\* Restarting OpenBSD Secure Shell server sshd \[ OK \]
-
-**root@DS2:/#**
-
-### Setting up Reverse Proxy.
-
-Login to server S1 and setup reverse port forwarding on port 33333 from
-DS1 to map to netcat server on S2 on port 3333. Similarly, setup reverse
-port forward on port 44444 from DS2 to map to netcat server S3 on port
-4444. The port numbers 33333 and 44444 are chosen for convenience and
-these can be any port number of your choice.
-
-Run the following command on S1
-
-**S1\>** docker exec -it S1 bash
-
-**root@S1**:/# ssh -f -4NT -R 0.0.0.0:33333:192.168.3.6:3333
-<root@172.21.2.2>
-
-**root@S1:/#** ssh -f -4NT -R 0.0.0.0:44444:192.168.3.7:4444
-<root@172.21.2.3>
-
-**root@S1:/#**
-
-The first commands setup of reverse port forward (ssh VPN tunnel)
-between DS1 (172.21.2.2) on port 3333 to S2(192.168.3.6) on port 3333.
-This means that if any packet is received by DS1 on port 33333, it will
-be carried to 192.168.3.6:3333. Since this is ssh connection on which
-traffic is allowed, this provides a way to bypass firewall.
-
-Similarly, the second command sets up a rever port forwarding (ssh VPN
-tunnel) between DS2(172.21.2.3:44444) to S3(192.168.3.7:4444).
-
-### Accessing Reverse Proxy.
-
-On S2, start netcat ssh server on port 3333 in perpetual mode (option
--k)
-
-**S2\>** docker exec -it S2 bash
-
-**root@S2:/#** nc -kl 3333
-
-Similarly, on S3, start netcat server on port 4444 in perpetual mode.
-
-**S3\>** docker exec -it S3 bash
-
-**root@S3:/#** nc -kl 4444
-
-On DS1, to connect to S3, use the following command to connect and
+Access DS1 and connect to S3, use the following command to connect and exchange chat messages
+- ` root@DS1:/# nc -v 172.21.2.3 44444`
+    ```
+    Connection to 172.21.2.3 44444 port [tcp/*] succeeded!
+    great
+    ```
+Access DS2 and connect to S2  use the following command to connect and
 exchange chat messages
+- `root@DS2:/# nc -v 172.21.2.2 33333`
+    ```
+    Connection to 172.21.2.2 33333 port [tcp/*] succeeded!
+    wow
+    ```
+#### More tunnels
 
-**DS1\>** docker exec -it DS1 bash
+Using this approach, define your own ssh VPN tunnels to access service on any port in corporate network which is not directly permitted by firewall.
 
-**root@DS1:/#** nc -v 172.21.2.3 44444
-
-**Connection to 172.21.2.3 44444 port \[tcp/\*\] succeeded!**
-
-On DS2, to connect to S2, use the following command to connect and
-exchange chat messages
-
-**DS2\>** docker exec -it DS2 bash
-
-**root@DS2:/#** nc -v 172.21.2.2 33333
-
-**Connection to 172.21.2.2 33333 port \[tcp/\*\] succeeded!**
-
-### More tunnels
-
-Using this approach, define your own ssh VPN tunnels to access service
-on any port in corporate network which is not directly permitted by
-firewall.
-
-## Implementing Firewall evasion -- Ingress Port Forwarding (Forward Tunnel)
+### Implementing Firewall evasion -- Ingress Port Forwarding (Forward Tunnel)
 
 To enable corporate network to access internet (User), set up ssh port
 forwarding DS1 to user
 
-### Web Services on Internet (User)
+***Kill all the netcat servers and clients***
 
-Start the apache web server on User (Internet host)
+#### Web Services on Internet (User)
 
-**User\>** docker exec -it User bash
+Start ssh service on User/Internet
+- `root@User:/# service ssh restart`
+```
+ * Restarting OpenBSD Secure Shell server sshd               [ OK ] 
+```
 
-**root@User:/#** service ssh restart
+Start the apache web server on User/Internet(If it is not already running)
+- `root@User:/# apache2ctl start`
 
-\* Restarting OpenBSD Secure Shell server sshd
+#### Setup Ingress Port Forwarding
 
-**root@User:/#** apache2ctl start
+Access a DS1 terminal and setup as ssh forward tunnel as follows
+- `root@S1:/# ssh -f -4NT -R 0.0.0.0:44444:192.168.3.7:4444 root@172.21.2.3`
 
-**AH00558: apache2: Could not reliably determine the server\'s fully
-qualified domain name, using 172.21.4.5. Set the \'ServerName\'
-directive globally to suppress this message**
+#### Access Public Internet from Corporate network.
 
-**root@User:/#**
+Access S1 server and access the web server using the ssh port forwarding
 
-### Setup Ingress Port Forwarding
+- `root@User:/# curl http://172.21.2.2:8080/welcome.html`
+```html
+<html>
+    <head>
+          <title>Welcome Page</title>
+    </head>
+    <body>
+          <h1>Welcome to HTTP Learning</h1>
+              Welcome to experiential learning of HTTP protocol.
+    </body>
+</html>
+```
 
-Login to DS1 and setup as ssh forward tunnel as follows
+## Load Balancing
 
-**DS1\>** docker exec -it DS1 bash
+Load balancing in a network is implemented many ways, but in this exercise, we will focus on using iptables for load balancing.
+- This mechanism uses the same connection, but works by changing transport and network level protocol parameters. 
+- We will continue to use the same network setup  for load balancing 
 
-**root@DS1:/#** ssh -f -4NT -L 0.0.0.0:8080:172.21.4.5:80
-root@172.21.4.5
+Further, in this exercise, we will implement load balancing at both of the following protocol levels.
+- HTTP Based load balancing, which is primarily used for balancing web traffic among servers, and
+- TCP Based load balancing.
 
-**root@DS1:/#**
+If not already, start the Apache web on of 3 servers, (*as usual ignore the errors when starting apache*)e.g.,
+- `root@S1:/# apache2ctl start`
+- `root@S2:/# apache2ctl start`
+- `root@S3:/# apache2ctl start`
 
-### Access Public Internet from Corporate network.
+###  Load Balancing using IPTABLES based Network Address Translation
 
-Loging to server and access the web server using the ssh port forwarding
+When using reverse proxy, the connection from client terminates at the load balancer and load balancer initiates new connection with the web server. 
+- An alternative way is to use NAT functionality along with distributing the traffic among NATted servers to achieve load balancing.
 
-**S1\>** docker exec -it S1 bash
+#### IPTABLES Rules for Load Balancing
 
-**root@S1:/#** curl http://172.21.2.2:8080/welcome.html
+Access the firewall (i.e., load balancer) and run the iptables commands to define loadbalacning rules as per requirements. 
+- Consider that we would like the web traffic to be directed to server S1, S2 and S3 in the ratio 5:3:2 i.e., out of 10 requests, 5 requests should be served by S1, 3 by S2 and remaining by S3. 
+- To meet this policy requirements, implement the following rules on Firewall FW
 
-**\<html\>**
+Direct 50% traffic to Server S1
+- `root@FW:/# iptables -t nat -A PREROUTING -p tcp --dport 80 -m statistic --mode random --probability 0.5 -j DNAT --to-destination 192.168.3.5:80`
 
-**\<head\>**
+Direct 30% traffic (60% of remaining 50% to Server S2)
+- `root@FW:/# iptables -t nat -A PREROUTING -p tcp --dport 80 -m statistic --mode random --probability 0.6 -j DNAT --to-destination 192.168.3.6:80`
+ 
+Direct remaining 20% traffic to Server S3
+- `root@FW:/# iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 192.168.3.7:80`
 
-**\<title\>Welcome Page\</title\>**
+Enables servers to respond back traffic thru load balance, may need masquerading
+- `root@FW:/# iptables -t nat -A POSTROUTING -p tcp -d 192.168.3.0/24 --dport 80 -j MASQUERADE`
 
-**\</head\>**
 
-**\<body\>**
+When firewall receives any packet, it matches the rules sequentially. 
+- Thus, first rule will be considered for every packet and it will probabilistically match 50% of the web traffic. 
+- The second rule will be evaluated for all those packets which does not match first rule i.e. it will be evaluated for 50% of traffic and will match 60% time (probability of 0.6). 
+- Thus, if 10 web requests are sent to firewall, about 5 packets will be matched by rule 1, 3 packets will be matched by rule 2 and remaining 2 packets will be accepted by rule 3. 
+- This provides load distribution among servers S1, S2 and S3 in the respective ratio of 5:3:2
 
-**\<h1\>Welcome to HTTP Learning\</h1\>**
+The last rule is required for NAT purposes so that FW can appropriately carry out DNAT and SNAT operation. 
+- A sample execution of accessing the web URL <http://192.168.3.100/cgi-bin/index.cgi> is shown in [Table 4](#_Ref206160479). 
+- This tables shows 10 web requests from host DS1 and then from from the web page received, grep command is used to display the local IP address of the web server, which helps in identifying the web server that served the web request. 
+- Since these rules are probability based, it may happen that for small number of packets, e.g., 10 or 20, the distribution may not be precisely in the ratio of 5:3:2, but when large number of web requsts will be send, the load distribution will show the expected results.
 
-**Welcome to experiential learning of HTTP protocol.**
+Access DS1 and observe this: 
+```
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.5
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.5
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.5
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.5
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.5
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.6
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.5
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.5
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.5
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.7
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.5
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.5
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.6
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.6
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.5
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.7
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.7
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.5
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.6
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.5
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.6
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.7
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.5
+root@DS1:/# curl -s http://192.168.3.100/cgi-bin/index.cgi | grep 192
+192.168.3.6
+```
 
-**\</body\>**
+#### A Different Load distribution
 
-**\</html\>**
+- To develop a better understanding of iptables based load balancing, rewrite these rules providing uniform load balancing among all 3 servers i.e. each server should approximately serve 1/3 of all web requests.
 
-**root@S1:/#**
+- As an additional exercise, design the network with 4 servers and implement uniform load balancing i.e each server should server 25% of web traffic.
 
-# Summary
+- Modify the IP Tables rule to implement TCP load balancing for some chosen port e.g., 9999 and run netcat server on this chosen port. Analyze the web traffic for load balancing the netcat traffic to these servers.
 
-> In this exercise, we have studied and learnt the following
+Once done stop the network with:
+- `docker compose -f util/yml/multi-Firewall-Functionality.yml down --remove-orphans`
 
-a.  Mechanism to evade or bypass firewall using the existing access to
-    end systems.
+## Summary
 
-b.  Setting up SSH Ingress port forwarding (ssh forward tunnel)
+In this exercise, we have studied and learnt the following
 
-c.  Setting up ssh Egress port forwarding (Reverse Tunnel)
+- Designing a network with firewall
+- Implement firewall rules using iptables as per policy
+- Verification of firewall functionality.
+- Mechanism to evade or bypass firewall using the existing access to end systems.
+- Setting up SSH Ingress port forwarding (ssh forward tunnel)
+- Setting up SSH Egress port forwarding (Reverse Tunnel)
+- Load balancing of web traffic using nginx as reverse proxy
+- Load balancing of TCP traffic using nginx as reverse proxy
+- Load balancing of web traffic using iptables.
 
-🡨end of Lab-CN-Wk13-S3🡪
+## Learning Resources
+
+Hands on network security
+- <https://www.handsonsecurity.net/resources.html>
+
+Understand IP Addressing: Everything you ever wanted to know
+- <https://ia800606.us.archive.org/21/items/B-001-002-066/501302.pdf>
+
+Computer Networks - A Top Down Approach, v8, Kurose, Ross; Pearson publishing
+
+Iptables tutorial
+- <https://www.frozentux.net/iptables-tutorial/iptables-tutorial.html>
