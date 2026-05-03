@@ -34,13 +34,12 @@ connect_veth() {
 echo "[*] Wiring containers with veth pairs..."
 
 # Connect HA -- S1
-connect_veth ha ha-eth0 s1 s1-eth0
+connect_veth HA ha-eth0 S1 s1-eth0
 # Connect HC -- S1
-connect_veth hc hc-eth0 s1 s1-eth1
+connect_veth HC hc-eth0 S1 s1-eth1
 # Connect HB -- S2
-connect_veth hb hb-eth0 s2 s2-eth0
+connect_veth HB hb-eth0 S2 s2-eth0
 # Connect HD -- S2
-connect_veth hd hd-eth0 s2 s2-eth1
+connect_veth HD hd-eth0 S2 s2-eth1
 # Connect S1 -- S2 (trunk)
-connect_veth s1 s1-eth2 s2 s2-eth2
-
+connect_veth S1 s1-eth2 S2 s2-eth2

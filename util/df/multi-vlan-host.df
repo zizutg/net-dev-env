@@ -1,0 +1,71 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      gnupg \
+      lsb-release \
+      iproute2 \
+      iputils-ping \
+      bridge-utils \
+      tcpdump \
+      net-tools \
+      util-linux \
+      sudo \
+      vim \
+      nano && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+      gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
+    chmod a+r /etc/apt/keyrings/docker.gpg && \
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo \"$VERSION_CODENAME\") stable" | \
+      tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+      containerd.io \
+      docker-buildx-plugin \
+      docker-ce \
+      docker-ce-cli \
+      docker-compose-plugin && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /var/run
+
+COPY util/yml/multi-vlans.yml /multi-vlans.yml
+COPY util/df/Programs/vlan0-create-interfaces.sh /vlan0-create-interfaces.sh
+COPY util/df/Programs/vlan1-create-bridge-if-inside-switch.sh /vlan1-create-bridge-if-inside-switch.sh
+COPY util/df/Programs/vlan2-create-vlans.sh /vlan2-create-vlans.sh
+COPY util/df/Programs/vlan3-assign-ips.sh /vlan3-assign-ips.sh
+
+RUN chmod +x /vlan0-create-interfaces.sh \
+             /vlan1-create-bridge-if-inside-switch.sh \
+             /vlan2-create-vlans.sh \
+             /vlan3-assign-ips.sh
+
+RUN printf '%s\n' '#!/bin/sh' 'exec docker compose "$@"' > /usr/local/bin/docker-compose && \
+    chmod +x /usr/local/bin/docker-compose
+
+RUN printf '%s\n' "export PS1='root@VH:\\w# '" >> /root/.bashrc
+
+WORKDIR /
+
+CMD ["bash", "-lc", "\
+if [ ! -S /var/run/docker.sock ]; then \
+  echo '[!] Docker socket not found. Start this container with -v /var/run/docker.sock:/var/run/docker.sock'; \
+  sleep infinity; \
+fi; \
+echo '[*] VLAN lab host ready.'; \
+echo '[*] Connected to outer Docker daemon.'; \
+echo '[*] Pre-pulling VLAN lab images...'; \
+docker pull zizutg/vlan-host-mini || true; \
+docker pull zizutg/vlan-router-mini || true; \
+echo '[*] Run: docker-compose -f /multi-vlans.yml up -d'; \
+echo '[*] Then run the VLAN scripts directly from /'; \
+sleep infinity"]

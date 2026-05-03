@@ -1,429 +1,354 @@
-VLANs
+# Lab 27 - Loadbalancing and VLANs
 
-# Overview
+This exercise first introduces load balancing using Nginx reverse proxy, and then continues with VLAN configuration and verification.
 
-This exercise provides basic understanding of VLANs.
+## Learning Objectives
 
-# Learning Objectives
+- Understand basic VLAN behavior
+- Understand 802.1Q VLAN tags
+- Verify access ports, trunk ports, and VLAN isolation
+- Understand Load Balancing using Reverse Proxy
+- Differentiate between load balancing of web traffic and general TCP traffic
 
-- Understand Working of VLANs.
 
-- Understand 802.1q VLAN tags.
+## Environment
 
-# Learning Resources
+Docker Desktop, which is an application environment for your laptop environment that enables running of containerized applications. The Docker Desktop integrates and provides access to a vast ecosystem of docker images via Docker Hub.
+
+## Load Balancing using Nginx Reverse Proxy
+
+### Network Topology
+
+This network setup is used to learn and practically experience functioning of load balancing in a network. 
+- Load balancing in a network is implemented many ways, but in this exercise, we will focus on following two mechanisms.
+- Load Balancing using Reverse Proxy (nginx) as shown in figure below. 
+- The TCP connection from client terminates at Load Balancer and a new connection is established between load balancer and backend server.
+
+<img src="images/lb.png">
+
+Further, in this exercise, we will implement load balancing at both of the following protocol levels.
+
+- HTTP Based load balancing, which is primarily used for balancing web traffic among servers, and
+- TCP Based load balancing.
+
+### Load Balancing using Reverse Proxy
+
+#### Creating Network
+
+The network using nginx reverse proxy does load balancing for web traffic at HTTP Protocol level as well as at TCP level. 
+- Since this network is using nginx, it requires a configuration file to be provided at the time of starting the load balancer. 
+- A sample configuration is available is available below. 
+- This network consists of 3 web servers (Apache web server) and 3 TCP echo servers. 
+- TCP echo server simply echoes back the user input prefixing it with its local IP address to help in identification of the echo server who is serving the request. 
+- Load balancer listens on port 80 for web traffic and port 9000 for echo service. 
+- The actual echo server uses the port number 5555 as shown. When docker instances are created, it prefixes the current directory name with the server. 
+- In this example, current directory is "yml" and hence all the 3 web servers and echo servers are prefixed with "yml-". If your directory is different, modify this file accordingly.
+```json
+events {}
+
+stream {
+  upstream echoservers {
+    server yml-echoserver-1:5555;
+    server yml-echoserver-2:5555;
+    server yml-echoserver-3:5555;
+  }
+  server {
+       listen 9000;
+       proxy_pass echoservers;
+  }
+}
+
+
+http {
+  upstream backend {
+    server yml-web-1:80;
+    server yml-web-2:80;
+    server yml-web-3:80;
+  }
+  server {
+       listen 80;
+       location / {
+         proxy_pass http://backend;
+       }
+  }
+}
+
+```
+
+
+Create the network as shown in above using `multi-LB-web-echo.yml` as below. 
+- As load balancer is using 3 web servers and 3 echo server, there number needs to be specified at the time of creating the network with the option `--scale`.
+- `docker compose -f util/yml/multi-LB-web-echo.yml up -d --scale web=3 --scale echoserver=3`
+
+Thus, this should create 7 instances as shown above. 
+- The load balancer is listening on port 80 for web and port 9000 for TCP Echo service.
+- Confirm the creation using `ps`:
+  - `docker ps`
+
+
+
+#### Load Balancing - TCP Echo Server
+
+Open few terminal windows and using netcat client, connect to localhost on port 9000 and communicate with it. 
+- Each response will show the Echo Server IP address before echoing back the text. 
+- You are doing this from your machine not the docker container, use `ncat` or `nc`
+
+On Terminal 1: `nc localhost 9000`
+```
+Hello From Terminal 1
+172.21.2.4: HELLO FROM TERMINAL 1
+```
+
+On Terminal 2: `nc localhost 9000`
+```
+Hello From Terminal 2
+172.21.2.6: HELLO FROM TERMINAL 2
+```
+
+On Terminal 3: `nc localhost 9000`
+```
+Hello From Terminal 3
+172.21.2.2: HELLO FROM TERMINAL 3
+```
+
+
+#### Load Balancing - Web Service
+
+Since all web servers serve the same content and thus from the web client perspective (curl or browser), we can't identify the web server which is serving the web page unless the content contains some unique information about the web server. 
+- For this purpose, the cgi-bin program index.cgi is used to display the IP address of the web server. 
+- Thus, to recognize the functioning of web server load balancing, access the URL `<http://localhost/cgi-bin/index.cgi>` few times using `curl`, and its content will display the local IP address of the web server. This is one multiple times from same terminal
+  - `curl http://localhost/cgi-bin/index.cgi`
+- This helps us recognize the web server from which the web content is being server. 
+- The response below, which is only parts of the web for the sake of brevity, shows that every curl is treated by different web servers. 
+
+```html
+<html> 
+  <body>
+    ...
+    This response is from web server: 
+    172.21.2.5
+  </body> 
+</html>
+```
+
+```html
+<html> 
+  <body>
+    ...
+    This response is from web server: 
+    172.21.2.7
+  </body> 
+</html>
+```
+
+```html
+<html> 
+  <body>
+    ...
+    This response is from web server: 
+    172.21.2.3
+  </body> 
+</html>
+```
+
+### Exploration of Load Balancing
+
+To develop a better understanding of load balancing, create different combinations of echo servers and web servers and load balance traffic among them. 
+- For example, create only 2 TCP echo servers, and 5 web servers and then access these. 
+- Choose port numbers of your choice. Access different contents from the web server an recognize the functioning of nginx based load balancing.
+
+
+
+## Virtual Local Area Network
+
+### Network Topology
+
+In this exercise we will use `multi-vlan-host`. At a high level, the VH is a Docker container that gives access to a prepared Linux environment named `VH` (VLAN Host). 
+- Inside `VH`, create the VLAN topology and complete the networking tasks from a terminal.
+- This is done because VLAN requires native Linux kernel.
+
+<img src="images/vlan.png">
+
+The network consists of:
+- two switches: `S1`, `S2`
+- four hosts: `HA`, `HB`, `HC`, `HD`
+  - Hosts `HA` and `HB` belong to VLAN `10`.
+  - Hosts `HC` and `HD` belong to VLAN `20`.
+
+Broadcast and unicast traffic within one VLAN should not be visible to
+hosts in the other VLAN.
+
+#### Starting the VH
+
+Start the prepared VH using the following command:
+- `docker run --rm -dit --privileged --pid=host --hostname VH -v /var/run/docker.sock:/var/run/docker.sock  --name VH zizutg/multi-vlan-host:latest`
+
+If pulling the image from Docker Hub is unsuccessful, build the image locally from the `util/df` directory and then run it:
+
+- `docker build -f util/df/multi-vlan-host.df -t multi-vlan-host .`
+- `docker run --rm -dit --privileged --pid=host --hostname VH -v /var/run/docker.sock:/var/run/docker.sock --name VH multi-vlan-host`
+
+
+
+- The `-v` mounts the Docker socket from the local machine into 
+  -  `-v /var/run/docker.sock:/var/run/docker.sock`
+- The `pid` shares the host PID namespace with the container
+
+Access the VH using docker exec, once inside, the prompt should appear similar to:
+- `root@VH:/#`
+
+VH contains 5 important file, which are also available in our repo under `util/df/Programs`, that allows us to create the VLAN.
+- `multi-vlans.yml`
+- `vlan0-create-interfaces.sh`
+- `vlan1-create-bridge-if-inside-switch.sh`
+- `vlan2-create-vlans.sh`
+- `vlan3-assign-ips.sh`
+
+Confirm if the following five files are already available at the root of the VH:
+- `root@VH:/# ls -l`
+
+To view the files inside VH, you can use `cat`
+- `root@VH:/# cat vlan0-create-interfaces.sh `
+
+#### Creating the VLAN Topology
+
+On the terminal VH is accessed, start the containers. Note that this docker compose occurs inside VH not vlan
+- `root@VH:/# docker-compose -p vlans -f /multi-vlans.yml up -d`
+  - These containers are initially created without the final VLAN topology.
+
+Create interfaces for each that is quired to connect `veth` pairs:
+- `root@VH:/# ./vlan0-create-interfaces.sh`
+  - This creates the required `veth` pairs and connects:
+    - `HA` to `S1`
+    - `HC` to `S1`
+    - `HB` to `S2`
+    - `HD` to `S2`
+    - `S1` to `S2` as a trunk link
+
+Create bridge `br0` inside `S1` and `S2`, which attaches the switch
+ports to the bridge, and enables VLAN filtering.
+- `root@VH:/# ./vlan1-create-bridge-if-inside-switch.sh`
+
+Create VLANs
+-` root@VH:/# ./vlan2-create-vlans.sh`      
+  - This configures:
+    - VLAN `10` on `S1` and `S2`
+    - VLAN `20` on `S1` and `S2`
+    - access ports for the end hosts
+    - a trunk port between `S1` and `S2`
+
+The final step is to assigns IP addresses to the hosts and enables their interfaces.
+- `root@VH:/# ./vlan3-assign-ips.sh `
+
+#### Check Connectivity
+
+Access HA from another terminal, although this is a docker inside another docker, the Docker Desktop appliaction allows us to access it in similar fashion to the past `docker exec -it HA bash`.
+- Check if HB is reachable from HA
+  - `root@HA:/# ping -c 2 192.168.1.201`
+- Confirm HC is not reachable from HA
+  - `root@HA:/# ping -c 2 192.168.2.201`
+
+### Packet Capture
+
+Use `tcpdump` to compare trunk traffic and host traffic.
+- Capture on the switch trunk at `S1`:
+  - `root@S1:/# tcpdump -e -n -i s1-eth2`
+- The result below will be shown after you sent a ping message from HA. 
+```
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on s1-eth2, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+16:28:09.953335 42:8d:ed:dd:64:69 > 0e:0f:78:96:bd:d7, ethertype 802.1Q (0x8100), length 102: vlan 10, p 0, ethertype IPv4 (0x0800), 192.168.1.11 > 192.168.1.201: ICMP echo request, id 6, seq 1, length 64
+16:28:09.953668 0e:0f:78:96:bd:d7 > 42:8d:ed:dd:64:69, ethertype 802.1Q (0x8100), length 102: vlan 10, p 0, ethertype IPv4 (0x0800), 192.168.1.201 > 192.168.1.11: ICMP echo reply, id 6, seq 1, length 64
+16:28:10.958150 42:8d:ed:dd:64:69 > 0e:0f:78:96:bd:d7, ethertype 802.1Q (0x8100), length 102: vlan 10, p 0, ethertype IPv4 (0x0800), 192.168.1.11 > 192.168.1.201: ICMP echo request, id 6, seq 2, length 64
+16:28:10.958265 0e:0f:78:96:bd:d7 > 42:8d:ed:dd:64:69, ethertype 802.1Q (0x8100), length 102: vlan 10, p 0, ethertype IPv4 (0x0800), 192.168.1.201 > 192.168.1.11: ICMP echo reply, id 6, seq 2, length 64
+16:28:11.983071 42:8d:ed:dd:64:69 > 0e:0f:78:96:bd:d7, ethertype 802.1Q (0x8100), length 102: vlan 10, p 0, ethertype IPv4 (0x0800), 192.168.1.11 > 192.168.1.201: ICMP echo request, id 6, seq 3, length 64
+16:28:11.983217 0e:0f:78:96:bd:d7 > 42:8d:ed:dd:64:69, ethertype 802.1Q (0x8100), length 102: vlan 10, p 0, ethertype IPv4 (0x0800), 192.168.1.201 > 192.168.1.11: ICMP echo reply, id 6, seq 3, length 64
+16:28:15.372178 42:8d:ed:dd:64:69 > 0e:0f:78:96:bd:d7, ethertype 802.1Q (0x8100), length 46: vlan 10, p 0, ethertype ARP (0x0806), Request who-has 192.168.1.201 tell 192.168.1.11, length 28
+16:28:15.372179 0e:0f:78:96:bd:d7 > 42:8d:ed:dd:64:69, ethertype 802.1Q (0x8100), length 46: vlan 10, p 0, ethertype ARP (0x0806), Request who-has 192.168.1.11 tell 192.168.1.201, length 28
+16:28:15.372230 42:8d:ed:dd:64:69 > 0e:0f:78:96:bd:d7, ethertype 802.1Q (0x8100), length 46: vlan 10, p 0, ethertype ARP (0x0806), Reply 192.168.1.11 is-at 42:8d:ed:dd:64:69, length 28
+16:28:15.372232 0e:0f:78:96:bd:d7 > 42:8d:ed:dd:64:69, ethertype 802.1Q (0x8100), length 46: vlan 10, p 0, ethertype ARP (0x0806), Reply 192.168.1.201 is-at 0e:0f:78:96:bd:d7, length 28
+16:29:02.476992 b2:74:5f:11:b4:36 > 33:33:00:00:00:02, ethertype IPv6 (0x86dd), length 70: fe80::b074:5fff:fe11:b436 > ff02::2: ICMP6, router solicitation, length 16
+```
+
+- Capture on host `HB`:
+  - `root@HB:/# tcpdump -e -n -i hb-eth0`
+- The result below will be shown after you sent a ping message from HA. 
+```
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on hb-eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+16:28:09.953504 42:8d:ed:dd:64:69 > 0e:0f:78:96:bd:d7, ethertype IPv4 (0x0800), length 98: 192.168.1.11 > 192.168.1.201: ICMP echo request, id 6, seq 1, length 64
+16:28:09.953641 0e:0f:78:96:bd:d7 > 42:8d:ed:dd:64:69, ethertype IPv4 (0x0800), length 98: 192.168.1.201 > 192.168.1.11: ICMP echo reply, id 6, seq 1, length 64
+16:28:10.958208 42:8d:ed:dd:64:69 > 0e:0f:78:96:bd:d7, ethertype IPv4 (0x0800), length 98: 192.168.1.11 > 192.168.1.201: ICMP echo request, id 6, seq 2, length 64
+16:28:10.958256 0e:0f:78:96:bd:d7 > 42:8d:ed:dd:64:69, ethertype IPv4 (0x0800), length 98: 192.168.1.201 > 192.168.1.11: ICMP echo reply, id 6, seq 2, length 64
+16:28:11.983147 42:8d:ed:dd:64:69 > 0e:0f:78:96:bd:d7, ethertype IPv4 (0x0800), length 98: 192.168.1.11 > 192.168.1.201: ICMP echo request, id 6, seq 3, length 64
+16:28:11.983207 0e:0f:78:96:bd:d7 > 42:8d:ed:dd:64:69, ethertype IPv4 (0x0800), length 98: 192.168.1.201 > 192.168.1.11: ICMP echo reply, id 6, seq 3, length 64
+16:28:15.371997 0e:0f:78:96:bd:d7 > 42:8d:ed:dd:64:69, ethertype ARP (0x0806), length 42: Request who-has 192.168.1.11 tell 192.168.1.201, length 28
+16:28:15.372210 42:8d:ed:dd:64:69 > 0e:0f:78:96:bd:d7, ethertype ARP (0x0806), length 42: Request who-has 192.168.1.201 tell 192.168.1.11, length 28
+16:28:15.372227 0e:0f:78:96:bd:d7 > 42:8d:ed:dd:64:69, ethertype ARP (0x0806), length 42: Reply 192.168.1.201 is-at 0e:0f:78:96:bd:d7, length 28
+16:28:15.372233 42:8d:ed:dd:64:69 > 0e:0f:78:96:bd:d7, ethertype ARP (0x0806), length 42: Reply 192.168.1.11 is-at 42:8d:ed:dd:64:69, length 28
+16:30:08.012097 ee:92:34:6a:41:d6 > 33:33:00:00:00:02, ethertype IPv6 (0x86dd), length 70: fe80::ec92:34ff:fe6a:41d6 > ff02::2: ICMP6, router solicitation, length 16
+16:32:19.085566 0e:0f:78:96:bd:d7 > 33:33:00:00:00:02, ethertype IPv6 (0x86dd), length 70: fe80::c0f:78ff:fe96:bdd7 > ff02::2: ICMP6, router solicitation, length 16
+```
+
+Then generate traffic from `HA`:
+- `root@HA:/# ping -c 3 192.168.1.201`
+
+Expected observation:
+
+- on `S1` trunk interface, packets should appear with `802.1Q` VLAN tags
+- on `HB`, packets should appear untagged on the access interface
+- ARP packets appear after successful `ping` traffic because Linux can reuse a cached MAC mapping first and refresh the ARP entry later.
+
+### More Exploration
+
+Send `ping` packets from `HC` to `HD` and analyze packet captures at the following points:
+
+- `HC`
+- `S1` on `s1-eth1`
+- `S1` on `s1-eth2`
+- `S2` on `s2-eth2`
+- `S2` on `s2-eth1`
+- `HD`
+
+As you examine the captures, observe that VLAN tags are used only on the trunk link between the two switches, namely:
+
+- `S1` on `s1-eth2`
+- `S2` on `s2-eth2`
+
+The access ports connected to end hosts should carry normal untagged Ethernet frames.
+
+Further, try to ping `HC` and `HD` from `HA`. These pings should fail. This is because such traffic is inter-VLAN traffic, and communication between different VLANs requires a router or Layer 3 device to forward packets between the VLANs.
+
+
+#### Observing ARP Before ICMP
+
+If you want to clearly observe the initial ARP exchange before the ICMP packets, restart the VLAN lab and perform packet capture before testing connectivity. A good approach is:
+1. stop and recreate the VLAN topology
+2. run the VLAN setup scripts again
+3. start `tcpdump` first
+4. send the first `ping` only after capture has already started
+5. skip any earlier connectivity test before this observation
+
+
+### Stopping the Lab
+
+Inside `VH`:
+- `root@HA:/# docker-compose -p vlans -f multi-vlans.yml down --remove-orphans`
+
+
+
+
+### Summary
+
+In this exercise, we have studied and learnt the following:
+- built a two-switch VLAN topology using Linux bridges with VLAN filtering
+- verified access-port, trunk-port, and host-to-host communication behavior
+- confirmed VLAN isolation and observed tagged trunk traffic with `tcpdump`
+- Load balancing of web traffic using nginx as reverse proxy
+- Load balancing of TCP traffic using nginx as reverse proxy
+
+
+## Learning Resources
 
 - Computer Networks - A Top Down Approach, v8, Kurose, Ross; Pearson
   publishing
-
-- RFC 2674: Definitions of Managed Objects for Bridges with Traffic
-  Classes, Multicast Filtering and Virtual LAN Extensions
-
-# Environment 
-
-This exercise requires Linux kernel support in the host system and thus
-will not work under Docker Desktop on Mac or Windows. Thus, setup a
-Ubuntu-24 Linux VM using VirtualBox or any other virtualization software
-to carry out this exercise. In the Linux VM, ensure to install docker
-packages, i.e., run following commands. All the docker container
-instances will be created in this Linux VM and not under docker desktop
-
-\$ sudo apt update
-
-\$ sudo apt install docker.io
-
-\$ sudo apt install docker-compose
-
-\$ sudo groupadd docker
-
-\$ sudo usermod -aG docker \$USER
-
-# Description
-
-## Network Setup
-
-![[]{#_Ref206247792 .anchor}Figure 1: Network with two
-VLANs](media/image1.png){width="5.673277559055118in"
-height="1.83957239720035in"}
-
-The network setup for this exercise is shown in [Figure
-1](#_Ref206247792), which consists of two network switches and 4 hosts.
-In this setup, hosts HA and HB are part of one VLAN (id 10) and hosts HC
-and HD are part of another VLAN (id 20). Thus, when any broadcast packet
-is sent by HA, it will only be seen by HB and this broadcast packet will
-not be seen by HC and HD. Since, HA and HC belong to different VLANs,
-they will not be able to communicate directly even though all machines
-are in Layer 2 Network.
-
-## Creating Network
-
-Copy the following files to Linux VM.
-
-i.  \${prefix}-vlans.yml
-
-ii. vlan0-create-interfaces.sh
-
-iii. vlan1-create-bridge-if-inside-switch.sh
-
-iv. vlan2-create-vlans.sh
-
-v.  vlan3-assign-ips.sh
-
-The network has two switches S1 and S2 working as bridges with VLANs.
-The bridge support requires direct Linux kernel support, and thus in
-this exercise, we will use docker compose to just create required
-containers and then create the network interfaces explicitly using
-scripts, create VLANs and assign them to switch ports (interfaces) as
-well as assign the IP addresses explicitly.
-
-### Creating docker network
-
-Using the docker compose file \${prefix}-vlans.yml to create the
-network, e.g.,
-
-\$\> docker-compose -f arm64-vlans-1.yml up -d
-
-This will create 6 docker containers with their respective names as s1,
-s2, ha, hb, hc and hd.
-
-### Creating Interfaces
-
-These containers created as above do not have any network interfaces
-assigned to them. Use the script vlan0-create-interfaces.sh (as shown in
-[Table 1](#_Ref206249758)) to create desired network interfaces.
-
-+--------------------------------------------------------------------------------------------+
-| #!/bin/bash                                                                                |
-|                                                                                            |
-| \# Run this program on Linux VM, and not inside any container.                             |
-|                                                                                            |
-| set -ex                                                                                    |
-|                                                                                            |
-| #\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-- |
-|                                                                                            |
-| \# Function to connect two containers with a veth pair                                     |
-|                                                                                            |
-| \# input parameters                                                                        |
-|                                                                                            |
-| \# \$1 - container name                                                                    |
-|                                                                                            |
-| \# \$2 - container interface                                                               |
-|                                                                                            |
-| \# \$3 - container connected to                                                            |
-|                                                                                            |
-| \# \$4 - interface of connected container.                                                 |
-|                                                                                            |
-| \#                                                                                         |
-|                                                                                            |
-| connect_veth() {                                                                           |
-|                                                                                            |
-| cntnr=\$1                                                                                  |
-|                                                                                            |
-| if_cntnr=\$2                                                                               |
-|                                                                                            |
-| other_cntnr=\$3                                                                            |
-|                                                                                            |
-| if_other_cntnr=\$4                                                                         |
-|                                                                                            |
-| pid_cntnr=\$(docker inspect -f \'{{.State.Pid}}\' \${cntnr})                               |
-|                                                                                            |
-| pid_other_cntnr=\$(docker inspect -f \'{{.State.Pid}}\' \${other_cntnr})                   |
-|                                                                                            |
-| \# Create veth pair                                                                        |
-|                                                                                            |
-| sudo ip link add \${if_cntnr} type veth peer name \${if_other_cntnr}                       |
-|                                                                                            |
-| \# Move into namespaces                                                                    |
-|                                                                                            |
-| sudo ip link set \${if_cntnr} netns \$pid_cntnr                                            |
-|                                                                                            |
-| sudo ip link set \${if_other_cntnr} netns \$pid_other_cntnr                                |
-|                                                                                            |
-| \# Bring up inside containers                                                              |
-|                                                                                            |
-| sudo nsenter -t \$pid_cntnr -n ip link set \${if_cntnr} up                                 |
-|                                                                                            |
-| sudo nsenter -t \$pid_other_cntnr -n ip link set \${if_other_cntnr} up                     |
-|                                                                                            |
-| }                                                                                          |
-|                                                                                            |
-| #\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-- |
-|                                                                                            |
-| echo \"\[\*\] Wiring containers with veth pairs\...\"                                      |
-|                                                                                            |
-| \# Connect HA \-- S1                                                                       |
-|                                                                                            |
-| connect_veth ha ha-eth0 s1 s1-eth0                                                         |
-|                                                                                            |
-| \# Connect HC \-- S1                                                                       |
-|                                                                                            |
-| connect_veth hc hc-eth0 s1 s1-eth1                                                         |
-|                                                                                            |
-| \# Connect HB \-- S2                                                                       |
-|                                                                                            |
-| connect_veth hb hb-eth0 s2 s2-eth0                                                         |
-|                                                                                            |
-| \# Connect HD \-- S2                                                                       |
-|                                                                                            |
-| connect_veth hd hd-eth0 s2 s2-eth1                                                         |
-|                                                                                            |
-| \# Connect S1 \-- S2 (trunk)                                                               |
-|                                                                                            |
-| connect_veth s1 s1-eth2 s2 s2-eth2                                                         |
-+============================================================================================+
-
-: : Creating Network interfaces for docker containers
-
-The interface names, as shown below, are defined for each recognition
-and indicates where these are created and connected. This script
-requires *sudo* privilege, and you need to enter *sudo* user password
-when the script is invoked.
-
-i.  ha-eth0 \# connected to s1-eth0
-
-ii. hb-eth0 \# connected to s1-eth1
-
-iii. hc-eth0 \# connected to s2-eth0
-
-iv. hd-eth0 \# connected to s2-eth1
-
-v.  s1-eth0 \# connected to ha
-
-vi. s1-eth1 \# connected to hb
-
-vii. s1-eth2 \# connected to s2
-
-viii. s2-eth0 \# connected to hc
-
-ix. s2-eth1 \# connected to hd
-
-x.  s2-eth2 \# connected to s1
-
-### Creating Bridge network
-
-The containers s1 and s2 are to be used as L2 switches, and thus need to
-configured to act as bridge (switch). In the Linux VM run the script
-vlan1-create-bridge-if-inside-switch.sh as show in [Table
-2](#_Ref206250022).
-
-+----------------------------------------------------------------------+
-| #!/bin/bash                                                          |
-|                                                                      |
-| \#                                                                   |
-|                                                                      |
-| set -ex                                                              |
-|                                                                      |
-| \# Create bridges inside switches                                    |
-|                                                                      |
-| docker exec s1 ip link add name br0 type bridge                      |
-|                                                                      |
-| docker exec s1 ip link set br0 up                                    |
-|                                                                      |
-| docker exec s1 ip link set s1-eth0 master br0                        |
-|                                                                      |
-| docker exec s1 ip link set s1-eth1 master br0                        |
-|                                                                      |
-| docker exec s1 ip link set s1-eth2 master br0                        |
-|                                                                      |
-| docker exec s2 ip link add name br0 type bridge                      |
-|                                                                      |
-| docker exec s2 ip link set br0 up                                    |
-|                                                                      |
-| docker exec s2 ip link set s2-eth0 master br0                        |
-|                                                                      |
-| docker exec s2 ip link set s2-eth1 master br0                        |
-|                                                                      |
-| docker exec s2 ip link set s2-eth2 master br0                        |
-|                                                                      |
-| echo \"\[\*\] Enabling VLAN filtering\...\"                          |
-|                                                                      |
-| docker exec s1 ip link set br0 type bridge vlan_filtering 1          |
-|                                                                      |
-| docker exec s2 ip link set br0 type bridge vlan_filtering 1          |
-+======================================================================+
-
-: : Creation of bridge inside containers
-
-### Creation of VLANs
-
-The hosts HA, HB, HC and HD are unaware of VLANs. The VLANs are handled
-at the level of switches. Thus, configure the container S1 and S2 such
-that the link s1(eth2)🡨🡪s2(eth2) actus as trunk port (i.e., VLAN tagging
-is enabled) and other switch ports should be untagged. Run the script
-vlan2-create-vlans.sh (as shown in [Table 3](#_Ref206250347)) to create
-two VLANs i.e., VLAN id=10 and VLAN id=20. Assign the ports *s1-eth0*
-and *s2-eth0* to VLAN id=10, and ports *s1-eth*1, *s2-eth1* to VLAN
-id=20.
-
-+----------------------------------------------------------------------+
-| #!/bin/bash                                                          |
-|                                                                      |
-| \#                                                                   |
-|                                                                      |
-| set -ex                                                              |
-|                                                                      |
-| echo \"\[\*\] Adding VLANs\...\"                                     |
-|                                                                      |
-| \# VLAN 10: HA \<-\> HB                                              |
-|                                                                      |
-| docker exec s1 bridge vlan add vid 10 pvid untagged dev s1-eth0      |
-|                                                                      |
-| docker exec s1 bridge vlan add vid 10 dev s1-eth2                    |
-|                                                                      |
-| docker exec s2 bridge vlan add vid 10 pvid untagged dev s2-eth0      |
-|                                                                      |
-| docker exec s2 bridge vlan add vid 10 dev s2-eth2                    |
-|                                                                      |
-| \# VLAN 20: HC \<-\> HD                                              |
-|                                                                      |
-| docker exec s1 bridge vlan add vid 20 pvid untagged dev s1-eth1      |
-|                                                                      |
-| docker exec s1 bridge vlan add vid 20 dev s1-eth2                    |
-|                                                                      |
-| docker exec s2 bridge vlan add vid 20 pvid untagged dev s2-eth1      |
-|                                                                      |
-| docker exec s2 bridge vlan add vid 20 dev s2-eth2                    |
-+======================================================================+
-
-: []{#_Ref206250347 .anchor}Table 3: Creating VLANs in switches
-
-## Running VLAN Traffic
-
-### Packet Capture of VLAN traffic
-
-Login to switch s1, and run packet capture on interface s1-eth2, which
-should show VLAN tags. Use the option -e to show the ethernet addresses.
-
-\$\> docker exec -it s1 bash
-
-root@546628b438b4:/# tcpdump -#n -i s1-eth2 -e
-
-tcpdump: verbose output suppressed, use -v\[v\]\... for full protocol
-decode
-
-listening on s1-eth2, link-type EN10MB (Ethernet), snapshot length
-262144 bytes
-
-Similarly, login to container hb, and run packet capture.
-
-HB\> docker exec -it hb bash
-
-root@35cb00ca8dff:/# tcpdump -#n -i hb-eth0 -e
-
-tcpdump: verbose output suppressed, use -v\[v\]\... for full protocol
-decode
-
-listening on hb-eth0, link-type EN10MB (Ethernet), snapshot length
-262144 bytes
-
-### Generate Network Traffic
-
-From host HA (192.168.1.21), send two ping packets to HB
-(192.168.1.201). The below example execute command on Linux VM itself to
-2 send 2 ping packets.
-
-HA\> docker exec -it ha ping -c2 192.168.1.201
-
-PING 192.168.1.201 (192.168.1.201) 56(84) bytes of data.
-
-64 bytes from 192.168.1.201: icmp_seq=1 ttl=64 time=0.106 ms
-
-64 bytes from 192.168.1.201: icmp_seq=2 ttl=64 time=0.739 ms
-
-\-\-- 192.168.1.201 ping statistics \-\--
-
-2 packets transmitted, 2 received, 0% packet loss, time 1019ms
-
-rtt min/avg/max/mdev = 0.106/0.422/0.739/0.316 ms
-
-### Packet Capture Analysis at s1
-
-The tcpdump on s1 (eth2) interface should show packet capture details as
-below.
-
-1 19:32:19.876677 ce:cc:ee:4b:55:6b \> ff:ff:ff:ff:ff:ff, ethertype
-802.1Q (0x8100), length 46: vlan 10, p 0, ethertype ARP (0x0806),
-Request who-has 192.168.1.201 tell 192.168.1.11, length 28
-
-2 19:32:19.876695 32:90:aa:fb:f7:bf \> ce:cc:ee:4b:55:6b, ethertype
-802.1Q (0x8100), length 46: vlan 10, p 0, ethertype ARP (0x0806), Reply
-192.168.1.201 is-at 32:90:aa:fb:f7:bf, length 28
-
-3 19:32:19.876704 ce:cc:ee:4b:55:6b \> 32:90:aa:fb:f7:bf, ethertype
-802.1Q (0x8100), length 102: vlan 10, p 0, ethertype IPv4 (0x0800),
-192.168.1.11 \> 192.168.1.201: ICMP echo request, id 7, seq 1, length 64
-
-4 19:32:19.876721 32:90:aa:fb:f7:bf \> ce:cc:ee:4b:55:6b, ethertype
-802.1Q (0x8100), length 102: vlan 10, p 0, ethertype IPv4 (0x0800),
-192.168.1.201 \> 192.168.1.11: ICMP echo reply, id 7, seq 1, length 64
-
-5 19:32:20.896898 ce:cc:ee:4b:55:6b \> 32:90:aa:fb:f7:bf, ethertype
-802.1Q (0x8100), length 102: vlan 10, p 0, ethertype IPv4 (0x0800),
-192.168.1.11 \> 192.168.1.201: ICMP echo request, id 7, seq 2, length 64
-
-6 19:32:20.897000 32:90:aa:fb:f7:bf \> ce:cc:ee:4b:55:6b, ethertype
-802.1Q (0x8100), length 102: vlan 10, p 0, ethertype IPv4 (0x0800),
-192.168.1.201 \> 192.168.1.11: ICMP echo reply, id 7, seq 2, length 64
-
-The first two packets show the ARP Request and reply and remaining 4
-packets corresponds to ICMP Echo Request and Echo Reply. In each of
-these packets, switch s1 inserts the VLAN tag 10 (vlan 10) before the
-ethertype ARP (0x0806). The switch s2 will receive this ethernet frame
-with tag of vlan 10, but when it gives to host HB, it removes the tag as
-seen in packet capture at HB.
-
-### Packet Capture Analysis at HB
-
-The tcpdump on hb (eth0) interface should show packet capture details as
-below.
-
-1 19:32:19.876686 ce:cc:ee:4b:55:6b \> ff:ff:ff:ff:ff:ff, ethertype ARP
-(0x0806), length 42: Request who-has 192.168.1.201 tell 192.168.1.11,
-length 28
-
-2 19:32:19.876693 32:90:aa:fb:f7:bf \> ce:cc:ee:4b:55:6b, ethertype ARP
-(0x0806), length 42: Reply 192.168.1.201 is-at 32:90:aa:fb:f7:bf, length
-28
-
-3 19:32:19.876705 ce:cc:ee:4b:55:6b \> 32:90:aa:fb:f7:bf, ethertype IPv4
-(0x0800), length 98: 192.168.1.11 \> 192.168.1.201: ICMP echo request,
-id 7, seq 1, length 64
-
-4 19:32:19.876719 32:90:aa:fb:f7:bf \> ce:cc:ee:4b:55:6b, ethertype IPv4
-(0x0800), length 98: 192.168.1.201 \> 192.168.1.11: ICMP echo reply, id
-7, seq 1, length 64
-
-5 19:32:20.896934 ce:cc:ee:4b:55:6b \> 32:90:aa:fb:f7:bf, ethertype IPv4
-(0x0800), length 98: 192.168.1.11 \> 192.168.1.201: ICMP echo request,
-id 7, seq 2, length 64
-
-6 19:32:20.896991 32:90:aa:fb:f7:bf \> ce:cc:ee:4b:55:6b, ethertype IPv4
-(0x0800), length 98: 192.168.1.201 \> 192.168.1.11: ICMP echo reply, id
-7, seq 2, length 64
-
-The first two packets correspond to ARP Request and Reply and last 4
-packets correspond to ICMP Echo request and Echo Reply. It is to be seen
-that in the ethernet frame, there is no vlan tag. This is because end
-hosts are unaware of VLAN tags and these are used only VLAN trunk port.
-
-### More Exploration.
-
-Send ping packets from HC to HD and analyze packet capture at HC,
-s1(eth1), s1(eth2), s2(eth2), s2(eth1) and HD. Recognize that Vlan tags
-are used only on trunk ports i.e., s1(eth2) and s2(eth2) and no other
-ports.
-
-Further, try to ping HC, HD from HA and it should fail. This is because
-this corresponds to Inter VLAN traffic and there need to exist a router
-that connects two VLANs.
-
-# Summary
-
-> In this exercise, we have studied and learnt the following
-
-a.  Usage of VLANs for traffic segmentation in Layer 2 network
-
-b.  Creation of VLAN trunks in L2 network
-
-c.  Recognizing VLAN tag in ethernet frames.
-
-🡨end of Lab-CN-Wk14-S1🡪

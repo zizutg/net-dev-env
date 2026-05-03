@@ -1,0 +1,56 @@
+networks:
+  net-int:
+    ipam:
+      config:
+        - subnet: 172.21.1.0/24
+  net-lan:
+    ipam:
+      config:
+        - subnet: 172.21.2.0/24
+
+services:
+  ha:
+    image: zizutg/net-ub22-host
+    container_name: HA
+    hostname: HA
+    networks:
+      net-int:
+    command: bash -c "mkdir -p /tmp
+                     && tail -f /dev/null
+                     "
+
+  web:
+    image: zizutg/net-ub22-host
+    networks:
+      net-lan:
+    expose: 
+      - "80"
+    command: bash -c "apachectl start 
+                     && tail -f /dev/null
+                     "
+
+  echoserver:
+    image: zizutg/multi-tcp-echo-server
+    environment: 
+      - ECHO_PORT=5555 # Internal port for echo server
+    networks:
+      net-lan:
+
+  Loadbalancer:
+    image: zizutg/multi-nginx-lb-echo
+    networks:
+      net-lan:
+        ipv4_address: 172.21.2.254
+      net-int:
+        ipv4_address: 172.21.1.254
+    volumes:
+      - ./nginx_lb_web_echo.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+      - echoserver
+    ports:
+      - "80:80"
+      - "9000:9000"
+    command: bash -c "nginx 
+                     && tail -f /dev/null
+                     "

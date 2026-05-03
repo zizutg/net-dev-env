@@ -1,0 +1,54 @@
+services:
+  ha:
+    image: zizutg/vlan-host-mini
+    container_name: HA
+    hostname: HA
+    cap_add:
+      - ALL
+    network_mode: none
+    privileged: true
+
+  hc:
+    image: zizutg/vlan-host-mini
+    container_name: HC
+    hostname: HC
+    cap_add:
+      - ALL
+    network_mode: none
+    privileged: true
+
+  hb:
+    image: zizutg/vlan-host-mini
+    container_name: HB
+    hostname: HB
+    cap_add:
+      - ALL
+    network_mode: none
+    privileged: true
+
+  hd:
+    image: zizutg/vlan-host-mini
+    container_name: HD
+    hostname: HD
+    cap_add:
+      - ALL
+    network_mode: none
+    privileged: true
+
+  s1:
+    image: zizutg/vlan-router-mini
+    container_name: S1
+    hostname: S1
+    network_mode: none
+    privileged: true
+    cap_add:
+      - ALL
+
+  s2:
+    image: zizutg/vlan-router-mini
+    container_name: S2
+    hostname: S2
+    network_mode: none
+    privileged: true
+    cap_add:
+      - ALL
