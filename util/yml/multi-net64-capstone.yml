@@ -1,0 +1,422 @@
+networks:
+  net-hq-dmz:
+    ipam:
+      config:
+        - subnet: 172.21.10.0/24
+          gateway: 172.21.10.250
+
+  net-hq-internal:
+    ipam:
+      config:
+        - subnet: 192.168.50.0/24
+          gateway: 192.168.50.250
+
+  net-b2-users:
+    ipam:
+      config:
+        - subnet: 172.21.20.0/24
+          gateway: 172.21.20.250
+
+  net-b2-gw:
+    ipam:
+      config:
+        - subnet: 172.21.100.0/29
+          gateway: 172.21.100.6
+
+  net-b3-gw:
+    ipam:
+      config:
+        - subnet: 172.21.100.8/29
+          gateway: 172.21.100.14
+
+  net-b3-v6:
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd00:30::/64
+          gateway: fd00:30::ffff
+
+services:
+  GW:
+    image: zizutg/multi-router
+    container_name: GW
+    hostname: GW
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      net-hq-dmz:
+        ipv4_address: 172.21.10.254
+      net-b2-gw:
+        ipv4_address: 172.21.100.1
+      net-b3-gw:
+        ipv4_address: 172.21.100.9
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add 192.168.50.0/24 via 172.21.10.1
+      && ip route add 172.21.20.0/24 via 172.21.100.2
+      && tail -f /dev/null
+      "
+
+  FW:
+    image: zizutg/multi-router
+    container_name: FW
+    hostname: FW
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      net-hq-dmz:
+        ipv4_address: 172.21.10.1
+      net-hq-internal:
+        ipv4_address: 192.168.50.254
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.10.254
+      && tail -f /dev/null
+      "
+
+  DS1:
+    image: zizutg/net-ub22-host
+    container_name: DS1
+    hostname: DS1
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-hq-dmz:
+        ipv4_address: 172.21.10.10
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.10.254
+      && ip route add 192.168.50.0/24 via 172.21.10.1
+      && tail -f /dev/null
+      "
+
+  DS2:
+    image: zizutg/net-ub22-host
+    container_name: DS2
+    hostname: DS2
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-hq-dmz:
+        ipv4_address: 172.21.10.11
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.10.254
+      && ip route add 192.168.50.0/24 via 172.21.10.1
+      && tail -f /dev/null
+      "
+
+  S1:
+    image: zizutg/net-ub22-host
+    container_name: S1
+    hostname: S1
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-hq-internal:
+        ipv4_address: 192.168.50.10
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 192.168.50.254
+      && tail -f /dev/null
+      "
+
+  S2:
+    image: zizutg/net-ub22-host
+    container_name: S2
+    hostname: S2
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-hq-internal:
+        ipv4_address: 192.168.50.11
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 192.168.50.254
+      && tail -f /dev/null
+      "
+
+  S3:
+    image: zizutg/net-ub22-host
+    container_name: S3
+    hostname: S3
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-hq-internal:
+        ipv4_address: 192.168.50.12
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 192.168.50.254
+      && tail -f /dev/null
+      "
+
+  H1:
+    image: zizutg/net-ub22-host
+    container_name: H1
+    hostname: H1
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-hq-internal:
+        ipv4_address: 192.168.50.21
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 192.168.50.254
+      && tail -f /dev/null
+      "
+
+  H2:
+    image: zizutg/net-ub22-host
+    container_name: H2
+    hostname: H2
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-hq-internal:
+        ipv4_address: 192.168.50.22
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 192.168.50.254
+      && tail -f /dev/null
+      "
+
+  B2R1:
+    image: zizutg/multi-router
+    container_name: B2R1
+    hostname: B2R1
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      net-b2-users:
+        ipv4_address: 172.21.20.254
+      net-b2-gw:
+        ipv4_address: 172.21.100.2
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.100.1
+      && tail -f /dev/null
+      "
+
+  B2PC1:
+    image: zizutg/net-ub22-host
+    container_name: B2PC1
+    hostname: B2PC1
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-b2-users:
+        ipv4_address: 172.21.20.11
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.20.254
+      && tail -f /dev/null
+      "
+
+  B2PC2:
+    image: zizutg/net-ub22-host
+    container_name: B2PC2
+    hostname: B2PC2
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-b2-users:
+        ipv4_address: 172.21.20.12
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.20.254
+      && tail -f /dev/null
+      "
+
+  B2SH1:
+    image: zizutg/net-ub22-host
+    container_name: B2SH1
+    hostname: B2SH1
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-b2-users:
+        ipv4_address: 172.21.20.21
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.20.254
+      && tail -f /dev/null
+      "
+
+  B2SH2:
+    image: zizutg/net-ub22-host
+    container_name: B2SH2
+    hostname: B2SH2
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-b2-users:
+        ipv4_address: 172.21.20.22
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.20.254
+      && tail -f /dev/null
+      "
+
+  B3R1:
+    image: zizutg/multi-router
+    container_name: B3R1
+    hostname: B3R1
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.forwarding=1
+    networks:
+      net-b3-gw:
+        ipv4_address: 172.21.100.10
+      net-b3-v6:
+        ipv6_address: fd00:30::fe
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip route delete default
+      && ip route add default via 172.21.100.9
+      && ip -6 route delete default || true
+      && tail -f /dev/null
+      "
+
+  B3PC1:
+    image: zizutg/net-ub22-host
+    container_name: B3PC1
+    hostname: B3PC1
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-b3-v6:
+        ipv6_address: fd00:30::11
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip -6 route delete default || true
+      && ip -6 route add default via fd00:30::fe
+      && tail -f /dev/null
+      "
+
+  B3PC2:
+    image: zizutg/net-ub22-host
+    container_name: B3PC2
+    hostname: B3PC2
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-b3-v6:
+        ipv6_address: fd00:30::12
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip -6 route delete default || true
+      && ip -6 route add default via fd00:30::fe
+      && tail -f /dev/null
+      "
+
+  B3SH1:
+    image: zizutg/net-ub22-host
+    container_name: B3SH1
+    hostname: B3SH1
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-b3-v6:
+        ipv6_address: fd00:30::21
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip -6 route delete default || true
+      && ip -6 route add default via fd00:30::fe
+      && tail -f /dev/null
+      "
+
+  B3SH2:
+    image: zizutg/net-ub22-host
+    container_name: B3SH2
+    hostname: B3SH2
+    privileged: true
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-b3-v6:
+        ipv6_address: fd00:30::22
+    command: >
+      bash -c "
+      mkdir -p /tmp
+      && ip -6 route delete default || true
+      && ip -6 route add default via fd00:30::fe
+      && tail -f /dev/null
+      "

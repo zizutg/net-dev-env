@@ -29,6 +29,12 @@ The given network range is 172.21.20.0/23 and your task is to divide this into 6
   - Start with the network with the largest number of IP addresses required and compute its applicable netmask. 
   - Assign the subnet work for this netmask and repeat the process. 
   - In the decreasing order of number IP addresses.
+- Note that `172.21.20.0/23` is larger than a single `/24` network.
+  - It covers the full address range `172.21.20.0 - 172.21.21.255`.
+  - Equivalently, it contains two contiguous `/24` blocks:
+    - `172.21.20.0/24`
+    - `172.21.21.0/24`
+- Thus, after assigning `172.21.20.0/24` to one subnet, the remaining available range is `172.21.21.0 - 172.21.21.255`.
 
 #### Network-C
 
@@ -39,6 +45,9 @@ This network needs 127 IP addresses corresponding to 126 hosts and 1 router inte
 
 Thus, network C is to be assigned network number as 172.21.20.0/24
 - The remaining range is 172.21.21.0-172.21.21.255
+- This does **not** mean that network C uses `172.21.21.x`.
+  - Network C uses only `172.21.20.0/24`.
+  - The `172.21.21.x` range remains available for the smaller subnets.
 
 #### Network-B
 
@@ -46,6 +55,7 @@ This network has 65 hosts and thus we need 65+1(router)+2=68 addresses in the ne
 
 Thus, this network is to be assigned a network number of 172.21.21.0/25
 - The remaining range is 172.21.21.128-172.21.21.255
+- There is no overlap with network C because network B is entirely within the remaining `172.21.21.x` block.
 
 #### Network-A
 
@@ -53,6 +63,24 @@ This network has 31 hosts and thus we need 31+1(router)+2=34 addresses in the ne
 
 Thus, this network is to be assigned a network number of 172.21.21.128/26.
 - The remaining range is 172.21.21.192-172.21.21.255
+- This also does not overlap network B.
+  - Network B uses `172.21.21.0 - 172.21.21.127`.
+  - Network A uses `172.21.21.128 - 172.21.21.191`.
+  - The remaining range `172.21.21.192 - 172.21.21.255` is then used for the router-to-router `/29` links and any future unused space.
+
+### Summary of the allocation
+
+The final subnet allocation is:
+
+- Network C: `172.21.20.0/24`
+- Network B: `172.21.21.0/25`
+- Network A: `172.21.21.128/26`
+- Router links:
+  - `172.21.21.192/29`
+  - `172.21.21.200/29`
+  - `172.21.21.208/29`
+
+These subnetworks do not overlap.
 
 #### Networks connecting Routers to each other.
 
